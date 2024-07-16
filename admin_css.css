@@ -1,0 +1,30 @@
+.container {
+    position: relative;
+    width: 40px;
+    height: 100px;
+    top: 30%;
+    margin: auto;
+    border-radius: 3px;
+    background-color: white;
+  }
+
+.buttons-container {
+    text-align: center;
+}
+
+.quiz-button {
+    margin: 10px; /* Adjust spacing between buttons */
+    padding: 10px 20px; /* Adjust button padding */
+    font-size: 16px; /* Adjust font size */
+    border: none;
+    background-color: #007bff; /* Button background color */
+    color: #fff; /* Button text color */
+    cursor: pointer;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.quiz-button:hover {
+    background-color: #0056b3; /* Button background color on hover */
+}

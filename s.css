@@ -1,0 +1,139 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* font-family: "Poppins", sans-serif; */
+}
+body {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background-image: url("bg.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  font-family: "Roboto", sans-serif;
+}
+a {
+  text-decoration: none;
+}
+.header {
+  position: fixed;
+  height: 80px;
+  width: 100%;
+  z-index: 100;
+  padding: 0 20px;
+}
+.nav {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+.nav,
+.nav_item {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav_logo,
+.nav_link,
+.button {
+  color: #fff;
+}
+.nav_logo {
+  font-size: 25px;
+}
+.nav_item {
+  column-gap: 25px;
+}
+.nav_link:hover {
+  color: #d9d9d9;
+}
+.button {
+  padding: 6px 24px;
+  border: 2px solid #fff;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.button:active {
+  transform: scale(0.98);
+}
+.signup-box {
+  position: relative;
+  top: 10%;
+  width: 360px;
+  height: 720px;
+  margin: auto;
+  background-color: white;
+  border-radius: 3px;
+}
+
+.login-box {
+  position: relative;
+  width: 360px;
+  height: 350px;
+  top: 30%;
+  margin: auto;
+  border-radius: 3px;
+  background-color: white;
+}
+
+h1 {
+  text-align: center;
+  padding-top: 15px;
+}
+
+h4 {
+  text-align: center;
+}
+
+form {
+  width: 300px;
+  margin-left: 20px;
+}
+
+form label {
+  display: flex;
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+form input {
+  width: 100%;
+  padding: 7px;
+  border: none;
+  border: 1px solid gray;
+  border-radius: 6px;
+  outline: none;
+}
+input[type="button"],input[type="submit"] {
+  width: 320px;
+  height: 35px;
+  margin-top: 20px;
+  border: none;
+  background-color: #49c1a2;
+  color: white;
+  font-size: 18px;
+}
+p {
+  text-align: center;
+  padding-top: 20px;
+  font-size: 15px;
+}
+.para-2 {
+  text-align: center;
+  color: white;
+  font-size: 15px;
+  margin-top: -10px;
+}
+.para-tag {
+  text-align: center;
+  color: black;
+  font-size: 15px;
+  margin-top: -10px;
+}
+.para-2 a {
+  color: #49c1a2;
+}
