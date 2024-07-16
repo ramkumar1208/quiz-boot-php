@@ -60,6 +60,9 @@ if (!isset($_SESSION['admin'])) {
         <a class="nav-link" href="viewmarks.php">Student Marks</a>
       </li>
       <li class="nav-item">
+        <a class="nav-link" href="department_management.php">Departments</a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link" href="student_management.php">Students managemant</a>
       </li>
       

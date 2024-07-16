@@ -34,10 +34,6 @@ if (isset($_SESSION['message']) && $_SESSION['message'] === "You are already log
       display: flex;
       justify-content: center;
       align-items: center;
-
-      #now added
-       ramkumar
-       joker
       height: 100vh;
       /* This will make the div vertically centered on the viewport */
     }
