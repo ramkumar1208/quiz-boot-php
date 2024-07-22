@@ -116,41 +116,92 @@ if ($session_id != $session_from_db) {
 
         <?php
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_POST['ques_set']) && !empty($_POST['ques_set'])) {
+                $quiz_id = $_POST['quiz_id'];
+                date_default_timezone_set('Asia/Singapore');
+                include "conn.php";
+                $res = mysqli_query($con, "SELECT * FROM quiz_topics WHERE quiz_id='$quiz_id'");
+                while ($row = mysqli_fetch_array($res)) {
+                    $duration = $row['total_time'];
+                    $_SESSION['start_time'] = $row['quiz_time'];
+                }
+                $_SESSION['duration'] = $duration;
+
+                list($hours, $minutes, $seconds) = explode(':', $_SESSION['duration']);
+                $end_time = date('Y-m-d H:i:s', strtotime("+{$hours} hours +{$minutes} minutes +{$seconds} seconds", strtotime($_SESSION["start_time"])));
+                $_SESSION['end_time'] = $end_time;
+
+                $quiz_link = $_POST['quiz_link'];
+                ?>
+                <div class="iframe-container">
+                    <iframe src="<?php echo htmlspecialchars($quiz_link); ?>"></iframe>
+                </div>
+                <?php
+            } else {
+                $_SESSION['message'] = "Quiz is not Here.";
+                header("Location: quiz.php");
+            }    
+            
+$set_id = isset($_POST['ques_set']) ? intval($_POST['ques_set']) : 0;
+
+if ($set_id > 0) {
+    $stmt = $conn->prepare("SELECT q.id AS question_id, q.question, q.question_image, a.id AS answer_id, a.answer
+                            FROM questions q
+                            JOIN answers a ON q.id = a.question_id
+                            WHERE q.set_id = ?
+                            ORDER BY q.id, a.id");
+    if ($stmt === false) {
+        die("Prepare failed: " . $conn->error);
+    }
+    $stmt->bind_param("i", $set_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $questions = [];
+    while ($row = $result->fetch_assoc()) {
+        $questions[$row['question_id']]['question'] = $row['question'];
+        $questions[$row['question_id']]['question_image'] = $row['question_image'];
+        $questions[$row['question_id']]['answers'][] = [
+            'answer_id' => $row['answer_id'],
+            'answer' => $row['answer']
+        ];
+    }
+    $stmt->close();
+}
             ?>
-            <div id="response"></div>
-            <form id="quizForm" action="quiz_completed.php" method="post">
+            <div id="response">
+            <form action="submit_quiz.php" method="post">
+        <input type="hidden" name="set_id" value="<?php echo $set_id; ?>">
+        <?php if (!empty($questions)): ?>
+            <?php foreach ($questions as $question_id => $question): ?>
+                <div>
+                    <p><?php echo htmlspecialchars($question['question']); ?></p>
+                    <?php if (!empty($question['question_image'])): ?>
+                        <img src="<?php echo htmlspecialchars($question['question_image']); ?>" alt="Question Image"><br>
+                    <?php endif; ?>
+                    <?php foreach ($question['answers'] as $answer): ?>
+                        <label>
+                            <input type="radio" name="answers[<?php echo $question_id; ?>]" value="<?php echo $answer['answer_id']; ?>" required>
+                            <?php echo htmlspecialchars($answer['answer']); ?>
+                        </label><br>
+                    <?php endforeach; ?>
+                </div>
+            <?php endforeach; ?>
+            <input type="submit" value="Submit">
+        <?php else: ?>
+            <p>No questions found for this set.</p>
+        <?php endif; ?>
+    </form>
+            </div>
+            <!-- <form id="quizForm" action="quiz_completed.php" method="post">
                 <input type="hidden" name="quiz_id" value="<?php echo $quiz_id; ?>">
                 <input type="hidden" name="quiz_link" value="<?php echo $quiz_link; ?>"><br>
 
                 <?php
-                if (isset($_POST['quiz_link']) && !empty($_POST['quiz_link'])) {
-                    $quiz_id = $_POST['quiz_id'];
-                    date_default_timezone_set('Asia/Singapore');
-                    include "conn.php";
-                    $res = mysqli_query($con, "SELECT * FROM quiz_topics WHERE quiz_id='$quiz_id'");
-                    while ($row = mysqli_fetch_array($res)) {
-                        $duration = $row['total_time'];
-                        $_SESSION['start_time'] = $row['quiz_time'];
-                    }
-                    $_SESSION['duration'] = $duration;
-
-                    list($hours, $minutes, $seconds) = explode(':', $_SESSION['duration']);
-                    $end_time = date('Y-m-d H:i:s', strtotime("+{$hours} hours +{$minutes} minutes +{$seconds} seconds", strtotime($_SESSION["start_time"])));
-                    $_SESSION['end_time'] = $end_time;
-
-                    $quiz_link = $_POST['quiz_link'];
-                    ?>
-                    <div class="iframe-container">
-                        <iframe src="<?php echo htmlspecialchars($quiz_link); ?>"></iframe>
-                    </div>
-                    <?php
-                } else {
-                    $_SESSION['message'] = "Quiz is not Here.";
-                    header("Location: quiz.php");
-                }
+                
                 ?>
                 <input type="submit" value="SUBMIT">
-            </form>
+            </form> -->
             <?php
         }
         ?>
