@@ -2,40 +2,48 @@
 include "conn.php"; 
 error_reporting(E_ALL);
 session_start();
-  if(isset($_SESSION['admin'])){
-    
-  }else{
-    $_SESSION['message']="admin please login first";
-  }
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $quiz_topic = $_POST['quiz_topic'];
-  $batch_code = $_POST['batch_code'];
-  
-  $myInputs = $_POST['inputs'];
-            
-  // Remove empty values
-  $myInputs = array_filter($myInputs);
 
-  // Combine inputs into comma-separated string if there are multiple inputs
-  $quiz_links = implode(',', $myInputs);
-  $num_questions = $_POST['how_many_questions'];
-  $total_marks = $_POST['total_marks'];
-  $quiz_date = $_POST['quiz_date'];
-  $quiz_time=$_POST['quiz_time'];
-  $timings = $_POST['timings'];
-
-  // Prepare insert query
-  $insert_query = "INSERT INTO quiz_topics (quiz_topic, batch_code, quiz_link, num_questions, total_marks, quiz_date, total_time ,quiz_time)
-                   VALUES ('$quiz_topic', '$batch_code', '$quiz_links', $num_questions, $total_marks, '$quiz_date', '$timings','$quiz_time')";
-
-  // Execute insert query
-  if(mysqli_query($con, $insert_query)) {
-      $_SESSION['message']="Quiz added successfully.";
-  } else {
-    $_SESSION['message']="Error: " . mysqli_error($con);
-  }
+if (isset($_SESSION['admin'])) {
+    // admin is logged in
+} else {
+    $_SESSION['message'] = "Admin please login first";
+    header('Location: login.php'); // Redirect to the login page
+    exit();
 }
-?> 
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $quiz_topic = $_POST['quiz_topic'];
+    $batch_code = $_POST['batch_code'];
+
+    $sets = $_POST['question_sets'];
+    $mysets = array_filter($sets);
+    $question_sets = implode(',', $mysets);
+
+    $num_questions = $_POST['how_many_questions'];
+    $total_marks = $_POST['total_marks'];
+    $quiz_date = $_POST['quiz_date'];
+    $quiz_time = $_POST['quiz_time'];
+    $timings = $_POST['timings'];
+
+    // Check if there is more than one question set selected
+    $set_column_value = count($mysets) > 1 ? 1 : 0;
+
+    // Prepare insert query
+    $insert_query = "INSERT INTO quiz_topics (quiz_topic, batch_code, question_sets, num_questions, total_marks, quiz_date, total_time, quiz_time, `set`)
+                     VALUES ('$quiz_topic', '$batch_code', '$question_sets', $num_questions, $total_marks, '$quiz_date', '$timings', '$quiz_time', $set_column_value)";
+
+    // Execute insert query
+    if (mysqli_query($con, $insert_query)) {
+        $_SESSION['message'] = "Quiz added successfully.";
+    } else {
+        $_SESSION['message'] = "Error: " . mysqli_error($con);
+    }
+
+    header('Location: add_quiz.php'); // Redirect after insertion
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <!-- Coding by CodingLab || www.codinglabweb.com -->
 <html lang="en">
@@ -84,6 +92,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   border-radius: 10px; /* Add your desired border radius */
 }
 </style>
+<script>
+        async function fetchQuestionSets(batchCode) {
+            const response = await fetch(`get_question_sets.php?batch_code=${batchCode}`);
+            const questionSets = await response.json();
+
+            const select = document.getElementById('questionSets');
+            select.innerHTML = '';
+
+            questionSets.forEach(set => {
+                const option = document.createElement('option');
+                option.value = set.id;
+                option.textContent = set.name;
+                select.appendChild(option);
+            });
+        }
+
+        function handleBatchCodeInput(event) {
+            const batchCode = event.target.value;
+            if (batchCode) {
+                fetchQuestionSets(batchCode);
+            }
+        }
+
+        function addInput(button) {
+            const inputContainer = document.getElementById('inputContainer');
+            const newInputGroup = document.createElement('div');
+            newInputGroup.classList.add('input-group');
+            newInputGroup.innerHTML = `
+                <input type="text" name="inputs[]" />
+                <button type="button" onclick="addInput(this)">Add</button>
+            `;
+            inputContainer.appendChild(newInputGroup);
+        }
+    </script>
 <script>
         function addInput(button) {
             const inputGroup = document.createElement('div');
@@ -169,51 +211,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     <?php } ?>
-<div class="main-section">
-    <form action="addquiz.php" method="post">
-        <div class="container">
-          <div class="row justify-content-center">
-               <div class="col-md-8">
-                <div class="card my-2 p-3">
-                  <div class="card-body">
-                      <div class="form-check">
-                      <h5 class="card-title py-2">Add Quiz Topic</h5>
-                      <textarea class="form-control" name="quiz_topic" required></textarea><br>
-                        <label for="batch_code">Enter batch Code</label><br>
-                       <input type="text" class="form-check-input" name="batch_code" id="batch_code" required><br><br>
-                       <label for="option">Enter Quiz Links here</label><br>
-                       <form id="dynamicForm">
-                          <div id="inputContainer">
-                              <div class="input-group">
-                                  <input type="text" name="inputs[]" />
-                                  <button type="button" onclick="addInput(this)">Add</button>
-                              </div>
-                          </div>
-                      </form>
-
-                       <label for="option">How many questions</label><br>
-                       <input type="text" class="form-check-input" name="how_many_questions" required><br><br>
-                       <label for="option">Total Marks</label><br>
-                       <input type="text" class="form-check-input" name="total_marks" required><br><br>
-                       <label for="option">Quiz date</label><br>
-                       <input type="date" class="form-check-input" name="quiz_date" required><br><br>
-                       <label for="quiz_time">Quiz Time:</label><br>
-                       <input type="time" id="quiz_time" name="quiz_time" value="13:15"><br><br>
-                       <label for="answer">Total Timings for the quiz(00:00:00)</label><br>
-                       <input type="text" class="form-check-input" name="timings" required><br><br>
-                      </div>
-                  </div>
+    <div class="main-section">
+        <form action="addquiz.php" method="post">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card my-2 p-3">
+                            <div class="card-body">
+                                <div class="form-check">
+                                    <h5 class="card-title py-2">Add Quiz Topic</h5>
+                                    <textarea class="form-control" name="quiz_topic" required></textarea><br>
+                                    <label for="batch_code">Enter Batch Code</label><br>
+                                    <input type="text" class="form-check-input" name="batch_code" id="batch_code" required oninput="handleBatchCodeInput(event)"><br><br>
+                                    <label for="questionSets">Select Question Sets</label><br>
+                                    <select id="questionSets" name="question_sets[]" multiple required>
+                                        <!-- Options will be populated dynamically -->
+                                    </select><br><br>
+                                    <label for="how_many_questions">How Many Questions</label><br>
+                                    <input type="text" class="form-check-input" name="how_many_questions" required><br><br>
+                                    <label for="total_marks">Total Marks</label><br>
+                                    <input type="text" class="form-check-input" name="total_marks" required><br><br>
+                                    <label for="quiz_date">Quiz Date</label><br>
+                                    <input type="date" class="form-check-input" name="quiz_date" required><br><br>
+                                    <label for="quiz_time">Quiz Time</label><br>
+                                    <input type="time" id="quiz_time" name="quiz_time" value="13:15"><br><br>
+                                    <label for="timings">Total Timings for the Quiz (00:00:00)</label><br>
+                                    <input type="text" class="form-check-input" name="timings" required><br><br>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8 mb-5">
+                        <button type="submit" class="btn btn-success" name="answer-submit">Add Quiz</button>
+                    </div>
                 </div>
-              </div>
-            <div class="col-md-8 mb-5">
-              <button type="submit" class="btn btn-success" name="answer-submit">Add Quiz</button>
             </div>
-          </div>
-        </div>
-    </form>
+        </form>
     </div>
-   
-  </div> 
   <script>
         function closeAlert() {
             const alertBox = document.getElementById('alertBox');

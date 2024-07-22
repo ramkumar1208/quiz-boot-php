@@ -133,13 +133,14 @@ if($session_id!=$session_from_db)
                 <th>Time</th>
                 <th>Total Time</th>
                 <th>Action</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
             <?php  
 
                 while($row = mysqli_fetch_assoc($view_query)) {
-                    $quiz_link = $row['quiz_link'];
+                    $question_sets = $row['question_sets'];
                    
                     $quiz_id=$row['quiz_id'];
             ?>     
@@ -177,23 +178,23 @@ if($session_id!=$session_from_db)
         if ($current_time >= $quiz_datetime_from_db && $current_time_only < $end_time) {
             // Show the start button if current date matches quiz date, current time is greater than or equal to quiz time, and current time is before end time
             ?>
-           <form action="quiz.php" method="post">
+           <form action="dummy_quiz.php" method="post">
                 <input type="hidden" name="quiz_id" value="<?php echo htmlspecialchars($quiz_id); ?>">
                 <?php if ($row['set'] > 0) {
-                      $quiz_links = explode(',', $row['quiz_link']);
+                      $question_sets = explode(',', $row['question_sets']);
 
                       // Trim and sanitize each link
-                      $trimmed_links = array_map('trim', $quiz_links);
+                      $trimmed_que_sets = array_map('trim', $question_sets);
               
                       // Remove any empty elements caused by extra commas or spaces
-                      $trimmed_links = array_filter($trimmed_links);
+                      $trimmed_que_sets = array_filter($trimmed_que_sets);
               
                       // Randomly select one link from trimmed links array
-                      $random_link = $trimmed_links[array_rand($trimmed_links)];
+                      $random_set = $trimmed_que_sets[array_rand($trimmed_que_sets)];
                     ?>
-                    <input type="hidden" name="quiz_link" value="<?php echo htmlspecialchars($random_link); ?>">
+                    <input type="hidden" name="ques_set" value="<?php echo htmlspecialchars($random_set); ?>">
                 <?php } else { ?>
-                    <input type="hidden" name="quiz_link" value="<?php echo htmlspecialchars($quiz_link); ?>">
+                    <input type="hidden" name="ques_set" value="<?php echo htmlspecialchars($question_sets); ?>">
                 <?php } ?>
                 <input type="submit" value="Start">
             </form>
@@ -213,6 +214,9 @@ if($session_id!=$session_from_db)
         echo "Oops! Looks like you've missed it!";
     }
     ?>
+</td>
+<td>
+
 </td>
 
 
