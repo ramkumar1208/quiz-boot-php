@@ -106,9 +106,10 @@ if(!$_SESSION['admin']){
                   <div class="card-body">
                     
                       <div class="form-check">
-                      <h5 class="card-title py-2">Add Quiz || Edit Quiz</h5>
+                      <h5 class="card-title py-2">Quiz Management </h5>
                       <a href="addquiz.php" class="quiz-button"><button type="button" class="btn btn-success">Add Quiz</button></a>
                       <a href="editquiz.php" class="quiz-button"><button type="button" class="btn btn-success">Edit Quiz</button></a>
+                      <a href="ad_que.php" class="quiz-button"><button type="button" class="btn btn-success">Add  Question Sets</button></a> 
                     </div>
                   </div>
                 </div>

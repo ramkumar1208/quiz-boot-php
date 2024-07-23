@@ -20,10 +20,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $correct_answers = $_POST['correct_answer'];
 
     $target_dir = "uploads/";
+    $total_questions = count($questions);
 
     // Insert the set name into the question_sets table
-    $stmt = $conn->prepare("INSERT INTO question_sets (set_name, batch_code) VALUES (?,?)");
-    $stmt->bind_param("ss", $set_name,$batch_code);
+    $stmt = $conn->prepare("INSERT INTO question_sets (set_name, batch_code,total_questions) VALUES (?,?,?)");
+    $stmt->bind_param("ssi", $set_name,$batch_code,$total_questions);
     $stmt->execute();
     $set_id = $stmt->insert_id;
 

@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $question_sets = implode(',', $mysets);
 
     $num_questions = $_POST['how_many_questions'];
-    $total_marks = $_POST['total_marks'];
+    $pass_percentage = $_POST['pass_percentage'];
     $quiz_date = $_POST['quiz_date'];
     $quiz_time = $_POST['quiz_time'];
     $timings = $_POST['timings'];
@@ -29,8 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $set_column_value = count($mysets) > 1 ? 1 : 0;
 
     // Prepare insert query
-    $insert_query = "INSERT INTO quiz_topics (quiz_topic, batch_code, question_sets, num_questions, total_marks, quiz_date, total_time, quiz_time, `set`)
-                     VALUES ('$quiz_topic', '$batch_code', '$question_sets', $num_questions, $total_marks, '$quiz_date', '$timings', '$quiz_time', $set_column_value)";
+    $insert_query = "INSERT INTO quiz_topics (quiz_topic, batch_code, question_sets, num_questions, pass_percentage, quiz_date, total_time, quiz_time, `set`)
+                     VALUES ('$quiz_topic', '$batch_code', '$question_sets', $num_questions, $pass_percentage, '$quiz_date', '$timings', '$quiz_time', $set_column_value)";
 
     // Execute insert query
     if (mysqli_query($con, $insert_query)) {
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['message'] = "Error: " . mysqli_error($con);
     }
 
-    header('Location: add_quiz.php'); // Redirect after insertion
+    header('Location: addquiz.php'); // Redirect after insertion
     exit();
 }
 ?>
@@ -93,27 +93,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 </style>
 <script>
-        async function fetchQuestionSets(batchCode) {
-            const response = await fetch(`get_question_sets.php?batch_code=${batchCode}`);
-            const questionSets = await response.json();
+           async function fetchQuestionSets(batchCode) {
+        const response = await fetch(`get_question_sets.php?batch_code=${batchCode}`);
+        const questionSets = await response.json();
 
-            const select = document.getElementById('questionSets');
-            select.innerHTML = '';
+        const select = document.getElementById('questionSets');
+        select.innerHTML = '';
 
-            questionSets.forEach(set => {
-                const option = document.createElement('option');
-                option.value = set.id;
-                option.textContent = set.name;
-                select.appendChild(option);
-            });
+        questionSets.forEach(set => {
+            const option = document.createElement('option');
+            option.value = set.id;
+            option.textContent = `${set.name} (Total Questions: ${set.total_questions})`;
+            select.appendChild(option);
+        });
+    }
+
+    function handleBatchCodeInput(event) {
+        const batchCode = event.target.value;
+        if (batchCode) {
+            fetchQuestionSets(batchCode);
         }
-
-        function handleBatchCodeInput(event) {
-            const batchCode = event.target.value;
-            if (batchCode) {
-                fetchQuestionSets(batchCode);
-            }
-        }
+    }
 
         function addInput(button) {
             const inputContainer = document.getElementById('inputContainer');
@@ -229,8 +229,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </select><br><br>
                                     <label for="how_many_questions">How Many Questions</label><br>
                                     <input type="text" class="form-check-input" name="how_many_questions" required><br><br>
-                                    <label for="total_marks">Total Marks</label><br>
-                                    <input type="text" class="form-check-input" name="total_marks" required><br><br>
+                                    <label for="total_marks">Passing percentage</label><br>
+                                    <input type="text" class="form-check-input" name="pass_percentage" required><br><br>
                                     <label for="quiz_date">Quiz Date</label><br>
                                     <input type="date" class="form-check-input" name="quiz_date" required><br><br>
                                     <label for="quiz_time">Quiz Time</label><br>

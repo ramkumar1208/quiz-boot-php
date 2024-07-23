@@ -118,7 +118,9 @@ if($session_id!=$session_from_db)
   </div>
 </nav>
 <div class="view-quizzes">
-    <h2>Quiz Schedule</h2>
+    <div class='text-center'>
+    <h5>Quiz Schedule</h5>
+    </div>
     <?php 
         $batch_code = $_SESSION['batch'];
         $view_quiz = "SELECT * FROM quiz_topics WHERE batch_code = '$batch_code'";
@@ -161,6 +163,25 @@ if($session_id!=$session_from_db)
                 ?></td>
            <td>
     <?php 
+        
+        $find_result = "SELECT result FROM results WHERE ic_number = ? AND quiz_id = ?";
+    $stmt = $con->prepare($find_result);
+    if (!$stmt) {
+        die("Prepare failed: " . $con->error);
+    }
+    $stmt->bind_param("si", $user, $quiz_id);
+    $stmt->execute();
+    $result_set = $stmt->get_result();
+
+    // Check if there are any rows returned
+    if ($result_set->num_rows == 1) {
+        // $row = $result_set->fetch_assoc();
+        // $result = $row['result'];
+        // $result_status = ($result == 1) ? "Pass" : "Fail";
+        echo "You have been completed this quiz";
+    } else if($result_set->num_rows == 0){
+
+
     date_default_timezone_set('Asia/Singapore'); // Set the correct timezone
     $current_time = date("Y-m-d H:i:s");
     $current_date = date("Y-m-d");
@@ -178,7 +199,7 @@ if($session_id!=$session_from_db)
         if ($current_time >= $quiz_datetime_from_db && $current_time_only < $end_time) {
             // Show the start button if current date matches quiz date, current time is greater than or equal to quiz time, and current time is before end time
             ?>
-           <form action="dummy_quiz.php" method="post">
+           <form action="quiz.php" method="post">
                 <input type="hidden" name="quiz_id" value="<?php echo htmlspecialchars($quiz_id); ?>">
                 <?php if ($row['set'] > 0) {
                       $question_sets = explode(',', $row['question_sets']);
@@ -213,11 +234,34 @@ if($session_id!=$session_from_db)
         // Show message if current date is after quiz date
         echo "Oops! Looks like you've missed it!";
     }
+
+
+}
     ?>
 </td>
 <td>
-
+<?php
+    
+    $find_result = "SELECT result FROM results WHERE ic_number = ? AND quiz_id = ?";
+    $stmt = $con->prepare($find_result);
+    if (!$stmt) {
+        die("Prepare failed: " . $con->error);
+    }
+    $stmt->bind_param("si", $user, $quiz_id);
+    $stmt->execute();
+    $result_set = $stmt->get_result();
+    if ($result_set->num_rows == 1) {
+        $row = $result_set->fetch_assoc();
+        $result = $row['result'];
+        $result_status = ($result == 1) ? "Pass" : "Fail";
+        echo $result_status;
+    } else if($result_set->num_rows == 0){
+        echo "Not completed";
+    }
+  
+?>
 </td>
+
 
 
             </tr>

@@ -116,6 +116,7 @@ if ($session_id != $session_from_db) {
 
         <?php
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $quiz_id = $_POST['quiz_id'];
             if (isset($_POST['ques_set']) && !empty($_POST['ques_set'])) {
                 $quiz_id = $_POST['quiz_id'];
                 date_default_timezone_set('Asia/Singapore');
@@ -131,11 +132,8 @@ if ($session_id != $session_from_db) {
                 $end_time = date('Y-m-d H:i:s', strtotime("+{$hours} hours +{$minutes} minutes +{$seconds} seconds", strtotime($_SESSION["start_time"])));
                 $_SESSION['end_time'] = $end_time;
 
-                $quiz_link = $_POST['quiz_link'];
                 ?>
-                <div class="iframe-container">
-                    <iframe src="<?php echo htmlspecialchars($quiz_link); ?>"></iframe>
-                </div>
+                
                 <?php
             } else {
                 $_SESSION['message'] = "Quiz is not Here.";
@@ -145,13 +143,13 @@ if ($session_id != $session_from_db) {
 $set_id = isset($_POST['ques_set']) ? intval($_POST['ques_set']) : 0;
 
 if ($set_id > 0) {
-    $stmt = $conn->prepare("SELECT q.id AS question_id, q.question, q.question_image, a.id AS answer_id, a.answer
+    $stmt = $con->prepare("SELECT q.id AS question_id, q.question, q.question_image, a.id AS answer_id, a.answer
                             FROM questions q
                             JOIN answers a ON q.id = a.question_id
                             WHERE q.set_id = ?
                             ORDER BY q.id, a.id");
     if ($stmt === false) {
-        die("Prepare failed: " . $conn->error);
+        die("Prepare failed: " . $con->error);
     }
     $stmt->bind_param("i", $set_id);
     $stmt->execute();
@@ -170,8 +168,11 @@ if ($set_id > 0) {
 }
             ?>
             <div id="response">
+            
+            </div>
+            <div id="question_display">
             <form action="submit_quiz.php" method="post">
-        <input type="hidden" name="set_id" value="<?php echo $set_id; ?>">
+       
         <?php if (!empty($questions)): ?>
             <?php foreach ($questions as $question_id => $question): ?>
                 <div>
@@ -187,21 +188,15 @@ if ($set_id > 0) {
                     <?php endforeach; ?>
                 </div>
             <?php endforeach; ?>
+            <input type="hidden" name="ic_number" value="<?php echo $user; ?>">
+            <input type="hidden" name="set_id" value="<?php echo $set_id; ?>">
+            <input type="hidden" name="quiz_id" value="<?php echo $quiz_id; ?>">        
             <input type="submit" value="Submit">
         <?php else: ?>
             <p>No questions found for this set.</p>
         <?php endif; ?>
     </form>
             </div>
-            <!-- <form id="quizForm" action="quiz_completed.php" method="post">
-                <input type="hidden" name="quiz_id" value="<?php echo $quiz_id; ?>">
-                <input type="hidden" name="quiz_link" value="<?php echo $quiz_link; ?>"><br>
-
-                <?php
-                
-                ?>
-                <input type="submit" value="SUBMIT">
-            </form> -->
             <?php
         }
         ?>
