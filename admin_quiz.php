@@ -110,6 +110,7 @@ if(!$_SESSION['admin']){
                       <a href="addquiz.php" class="quiz-button"><button type="button" class="btn btn-success">Add Quiz</button></a>
                       <a href="editquiz.php" class="quiz-button"><button type="button" class="btn btn-success">Edit Quiz</button></a>
                       <a href="ad_que.php" class="quiz-button"><button type="button" class="btn btn-success">Add  Question Sets</button></a> 
+                      <a href="edit_questions.php" class="quiz-button"><button type="button" class="btn btn-success">Edit  Question Sets</button></a> 
                     </div>
                   </div>
                 </div>

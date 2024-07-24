@@ -140,7 +140,7 @@ $admin=$_SESSION['admin'];
         <tbody>
             <?php  
                 while($row = mysqli_fetch_assoc($view_query)) {
-                    $quiz_link = $row['quiz_link'];
+                    // $quiz_link = $row['question_sets'];
                     $quiz_id=$row['quiz_id'];
             ?>     
             <tr>
