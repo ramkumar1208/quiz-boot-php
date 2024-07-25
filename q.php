@@ -6,8 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_quiz_by_id'])) {
     $questions = isset($_POST['questions']) ? $_POST['questions'] : [];
     $answers = isset($_POST['answers']) ? $_POST['answers'] : [];
     $correct_answers = isset($_POST['correct_answer']) ? $_POST['correct_answer'] : [];
-    $q_id = $_POST['set_id'];
-    $set_name = $_POST['set_name'];
+    $q_id = mysqli_real_escape_string($con, $_POST['set_id']);
+    $set_name = mysqli_real_escape_string($con, $_POST['set_name']);
     $uploaded_images = [];
     $new_questions_count = 0;
     $removed_questions = isset($_POST['removed_questions']) ? array_filter(explode(',', $_POST['removed_questions'])) : [];
@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_quiz_by_id'])) {
         if (!empty($name)) {
             $target_file = $target_dir . basename($name);
             if (move_uploaded_file($_FILES['question_images']['tmp_name'][$index], $target_file)) {
-                $uploaded_images[$index] = $target_file;
+                $uploaded_images[$index] = mysqli_real_escape_string($con, $target_file);
             } else {
                 echo "Error uploading file: " . $_FILES['question_images']['error'][$index];
                 exit();
@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_quiz_by_id'])) {
     // Remove deleted questions and their answers
     foreach ($removed_questions as $question_id) {
         if (!empty($question_id)) {
+            $question_id = mysqli_real_escape_string($con, $question_id);
             $delete_answers_query = "DELETE FROM answers WHERE question_id='$question_id'";
             if (!mysqli_query($con, $delete_answers_query)) {
                 echo "Error deleting answers: " . mysqli_error($con);
@@ -46,8 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_quiz_by_id'])) {
     }
 
     foreach ($questions as $q_index => $question) {
-        $question_id = isset($_POST['question_ids'][$q_index]) ? $_POST['question_ids'][$q_index] : null;
+        $question_id = isset($_POST['question_ids'][$q_index]) ? mysqli_real_escape_string($con, $_POST['question_ids'][$q_index]) : null;
         $question_image = isset($uploaded_images[$q_index]) ? $uploaded_images[$q_index] : null;
+        $question = mysqli_real_escape_string($con, $question);
 
         if ($question_id) {
             // Fetch existing image path if no new image is uploaded
@@ -76,7 +78,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_quiz_by_id'])) {
 
         if (isset($answers[$q_index]) && is_array($answers[$q_index])) {
             foreach ($answers[$q_index] as $a_index => $answer) {
-                $answer_id = isset($_POST['answer_ids'][$q_index][$a_index]) ? $_POST['answer_ids'][$q_index][$a_index] : null;
+                $answer_id = isset($_POST['answer_ids'][$q_index][$a_index]) ? mysqli_real_escape_string($con, $_POST['answer_ids'][$q_index][$a_index]) : null;
+                $answer = mysqli_real_escape_string($con, $answer);
                 $is_correct = (isset($correct_answers[$q_index]) && $a_index == $correct_answers[$q_index]) ? 1 : 0;
 
                 if ($answer_id) {
@@ -99,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_quiz_by_id'])) {
     }
 
     // Update total questions and set name in question_sets
-    $total_questions = $_POST['total_question'];
+    $total_questions = mysqli_real_escape_string($con, $_POST['total_question']);
     $remaining_questions = $total_questions - count($removed_questions) + $new_questions_count; // Adjust the count based on removals and additions
 
     $update_question_sets_query = "UPDATE question_sets SET total_questions='$remaining_questions', set_name='$set_name' WHERE set_id='$q_id'";
