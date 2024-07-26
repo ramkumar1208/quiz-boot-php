@@ -1,44 +1,3 @@
-<?php 
-include "conn.php";
-session_start();
-if (!isset($_SESSION['admin'])) {
-    $_SESSION['message'] = "Please login first";
-    header("Location: admin.php");
-    exit();
-}
-
-// Initialize search variables
-$ic_number_search = "";
-$batch_code_search = "";
-
-// Initialize result variable
-$result = null;
-
-// Check if the request method is POST and process accordingly
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $ic_number_search = isset($_POST['ic_number_search']) ? $_POST['ic_number_search'] : "";
-    $batch_code_search = isset($_POST['batch_code_search']) ? $_POST['batch_code_search'] : "";
-
-    // Build the search query
-    $query = "SELECT * FROM results WHERE 1=1"; // Base query
-
-    if (!empty($ic_number_search)) {
-        $query .= " AND ic_number LIKE '%" . mysqli_real_escape_string($con, $ic_number_search) . "%'";
-    }
-
-    if (!empty($batch_code_search)) {
-        $query .= " AND batch_code LIKE '%" . mysqli_real_escape_string($con, $batch_code_search) . "%'";
-    }
-
-    // Execute the query
-    $result = mysqli_query($con, $query);
-} else {
-    // Default query to display all results if no search is applied
-    $query = "SELECT * FROM results";
-    $result = mysqli_query($con, $query);
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,6 +23,82 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             margin-top: 20px;
         }
     </style>
+    <script>
+        $(document).ready(function() {
+            function fetchResults() {
+                $.ajax({
+                    type: "POST",
+                    url: "search_results.php",
+                    data: {
+                        ic_number_search: $('#ic_number_search').val(),
+                        batch_code_search: $('#batch_code_search').val()
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        var tableBody = $('#results_table tbody');
+                        tableBody.empty();
+                        if (response.length > 0) {
+                            $.each(response, function(index, result) {
+                                var row = '<tr>' +
+                                    '<td>' + result.ic_number + '</td>' +
+                                    '<td>' + result.batch_code + '</td>' +
+                                    '<td>' + result.set_id + '</td>' +
+                                    '<td>' + result.quiz_id + '</td>' +
+                                    '<td>' + (result.result == 1 ? "Pass" : "Fail") + '</td>' +
+                                    '<td>' + result.total_questions + '</td>' +
+                                    '<td>' + result.correct_answers + '</td>' +
+                                    '<td>' + result.created_at + '</td>' +
+                                    '</tr>';
+                                tableBody.append(row);
+                            });
+                        } else {
+                            tableBody.append('<tr><td colspan="8" class="text-center">No results found</td></tr>');
+                        }
+                    }
+                });
+            }
+
+            // Trigger fetchResults on input change
+            $('#ic_number_search, #batch_code_search').on('input', fetchResults);
+
+            // Initial fetch
+            fetchResults();
+
+            // Generate Excel file on button click
+            $('#generate_excel').click(function() {
+                var tableData = [];
+                var headers = [];
+                $('#results_table thead th').each(function() {
+                    headers.push($(this).text());
+                });
+                tableData.push(headers.join(","));
+                
+                $('#results_table tbody tr').each(function() {
+                    var rowData = [];
+                    $(this).find('td').each(function() {
+                        rowData.push($(this).text());
+                    });
+                    tableData.push(rowData.join(","));
+                });
+
+                $.ajax({
+                    type: "POST",
+                    url: "generate_csv.php",
+                    data: {
+                        table_data: tableData.join("\n")
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.status == 'success') {
+                            window.location.href = response.file;
+                        } else {
+                            alert("Error generating CSV file");
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="container-fluid">
@@ -118,17 +153,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <form method="POST" class="form-inline justify-content-center">
                         <div class="form-group mx-sm-3 mb-2">
                             <label for="ic_number_search" class="sr-only">IC Number</label>
-                            <input type="text" class="form-control" id="ic_number_search" name="ic_number_search" placeholder="IC Number" value="<?php echo htmlspecialchars($ic_number_search); ?>">
+                            <input type="text" class="form-control" id="ic_number_search" name="ic_number_search" placeholder="IC Number">
                         </div>
                         <div class="form-group mx-sm-3 mb-2">
                             <label for="batch_code_search" class="sr-only">Batch Code</label>
-                            <input type="text" class="form-control" id="batch_code_search" name="batch_code_search" placeholder="Batch Code" value="<?php echo htmlspecialchars($batch_code_search); ?>">
+                            <input type="text" class="form-control" id="batch_code_search" name="batch_code_search" placeholder="Batch Code">
                         </div>
-                        <button type="submit" class="btn btn-primary mb-2">Search</button>
+                        <button id="generate_excel" class="btn btn-success mb-2">Generate Excel File</button>
                     </form>
 
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table table-bordered" id="results_table">
                             <thead>
                                 <tr>
                                     <th>IC Number</th>
@@ -142,24 +177,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php
-                                if ($result && mysqli_num_rows($result) > 0) {
-                                    while ($row = mysqli_fetch_assoc($result)) {
-                                        echo "<tr>
-                                            <td>{$row['ic_number']}</td>
-                                            <td>{$row['batch_code']}</td>
-                                            <td>{$row['set_id']}</td>
-                                            <td>{$row['quiz_id']}</td>
-                                            <td>{$row['result']}</td>
-                                            <td>{$row['total_questions']}</td>
-                                            <td>{$row['correct_answers']}</td>
-                                            <td>{$row['created_at']}</td>
-                                        </tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='8' class='text-center'>No results found</td></tr>";
-                                }
-                                ?>
+                                <!-- Results will be inserted here dynamically -->
                             </tbody>
                         </table>
                     </div>
