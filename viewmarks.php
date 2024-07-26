@@ -106,8 +106,8 @@ if(!$_SESSION['admin']){
                   <div class="card-body">
                     
                       <div class="form-check">
-                      <h5 class="card-title py-2">Student Management</h5>
-                      <a href="#" class="quiz-button"><button type="button" class="btn btn-success">View Student Marks</button></a>
+                      <h5 class="card-title py-2">Student Results</h5>
+                      <a href="view_student_results.php" class="quiz-button"><button type="button" class="btn btn-success">View Student Marks</button></a>
                       <a href="#" class="quiz-button"><button type="button" class="btn btn-success">Export to excel</button></a>
                     </div>
                   </div>

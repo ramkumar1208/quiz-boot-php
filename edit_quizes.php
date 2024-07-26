@@ -1,67 +1,71 @@
 <?php
 include "conn.php";
 error_reporting(E_ALL);
-// require_once("function.php");
 session_start();
 
 if (!isset($_SESSION['admin'])) {
-  $_SESSION['message']="please login first";
-  header("Location: admin.php");
-  exit();
+    $_SESSION['message'] = "Please login first";
+    header("Location: admin.php");
+    exit();
 }
-$admin=$_SESSION['admin'];
+$admin = $_SESSION['admin'];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  if(isset($_POST['edit_quiz_by_id'])){
-    echo "hi";
-    $quiz_topic = $_POST['quiz_topic'];
-    $batch_code = $_POST['batch_code'];
-    $quiz_link = $_POST['quiz_Link'];
-    $num_questions = $_POST['how_many_questions'];
-    $total_marks = $_POST['total_marks'];
-    $quiz_date = $_POST['quiz_date'];
-    $quiz_time=$_POST['quiz_time'];
-    $timings = $_POST['timings'];
-    $id=$_POST['quiz_id'];
+    if (isset($_POST['edit_quiz_by_id'])) {
+        $quiz_topic = $_POST['quiz_topic'];
+        $batch_code = $_POST['batch_code'];
+        
+        $sets = $_POST['question_sets'];
+        $mysets = array_filter($sets);
+        $question_sets = implode(',', $mysets);
+        $num_questions = $_POST['how_many_questions'];
+        $pass_percentage = $_POST['pass_percentage'];
+        $quiz_date = $_POST['quiz_date'];
+        $quiz_time = $_POST['quiz_time'];
+        $timings = $_POST['timings'];
+        $id = $_POST['quiz_id'];
+        $set_column_value = count($mysets) > 1 ? count($mysets) : 0;
 
-    $stmt = $con->prepare("UPDATE quiz_topics SET 
-    quiz_topic = ?, 
-    batch_code = ?, 
-    quiz_link = ?, 
-    num_questions = ?, 
-    total_marks = ?, 
-    quiz_date = ?, 
-    total_time = ?, 
-    quiz_time = ?
-WHERE quiz_id = ?");
+        $stmt = $con->prepare("UPDATE quiz_topics SET 
+            quiz_topic = ?, 
+            batch_code = ?, 
+            question_sets = ?, 
+            num_questions = ?, 
+            pass_percentage = ?, 
+            quiz_date = ?, 
+            total_time = ?, 
+            quiz_time = ?, 
+            `set` = ?
+            WHERE quiz_id = ?");
 
-    $stmt->bind_param("sssiisssi", $quiz_topic,  $batch_code,   $quiz_link,   $num_questions,     $total_marks,  $quiz_date,       $timings, $quiz_time,  $id);
+        $stmt->bind_param("sssissssii", $quiz_topic, $batch_code, $question_sets, $num_questions, $pass_percentage, $quiz_date, $timings, $quiz_time, $set_column_value, $id);
 
-    if ($stmt->execute()) {
-      $_SESSION['message'] = "Quiz Edited successfully.";
-      header("Location: editquiz.php"); // Corrected redirection to viewquiz.php
-      exit(); 
-  } else {
-      $_SESSION['message'] = "Error: " . $stmt->error;
-      header("Location: editquiz.php"); // Redirect to editquiz.php in case of error
-      exit(); 
-  }
+        if ($stmt->execute()) {
+            $_SESSION['message'] = "Quiz Edited successfully.";
+            header("Location: editquiz.php");
+            exit(); 
+        } else {
+            $_SESSION['message'] = "Error: " . $stmt->error;
+            header("Location: editquiz.php");
+            exit(); 
+        }
 
-  }
-  else if(isset($_POST['delete'])){
-     $quiz_id = $_POST['quiz_id'];
-     $stmt = $con->prepare("DELETE FROM quiz_topics WHERE quiz_id = ?");
-     $stmt->bind_param("i", $quiz_id);
-     if ($stmt->execute()) {
-         $_SESSION['message'] = "Quiz Deleted successfully.";
-     } else {
-         $_SESSION['message'] = "Error: " . $stmt->error;
-     }
-     
-     header("Location: editquiz.php");
-     exit();
-  }
+    } else if (isset($_POST['delete'])) {
+        $quiz_id = $_POST['quiz_id'];
+        $stmt = $con->prepare("DELETE FROM quiz_topics WHERE quiz_id = ?");
+        $stmt->bind_param("i", $quiz_id);
+        if ($stmt->execute()) {
+            $_SESSION['message'] = "Quiz Deleted successfully.";
+        } else {
+            $_SESSION['message'] = "Error: " . $stmt->error;
+        }
+        
+        header("Location: editquiz.php");
+        exit();
+    }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -122,6 +126,40 @@ WHERE quiz_id = ?");
   border-radius: 10px; /* Add your desired border radius */
 }
 </style>
+<script>
+           async function fetchQuestionSets(batchCode) {
+        const response = await fetch(`get_question_sets.php?batch_code=${batchCode}`);
+        const questionSets = await response.json();
+
+        const select = document.getElementById('questionSets');
+        select.innerHTML = '';
+
+        questionSets.forEach(set => {
+            const option = document.createElement('option');
+            option.value = set.id;
+            option.textContent = `${set.name} (Total Questions: ${set.total_questions})`;
+            select.appendChild(option);
+        });
+    }
+
+    function handleBatchCodeInput(event) {
+        const batchCode = event.target.value;
+        if (batchCode) {
+            fetchQuestionSets(batchCode);
+        }
+    }
+
+        function addInput(button) {
+            const inputContainer = document.getElementById('inputContainer');
+            const newInputGroup = document.createElement('div');
+            newInputGroup.classList.add('input-group');
+            newInputGroup.innerHTML = `
+                <input type="text" name="inputs[]" />
+                <button type="button" onclick="addInput(this)">Add</button>
+            `;
+            inputContainer.appendChild(newInputGroup);
+        }
+    </script>
   </head>
   <body>
       <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script> -->
@@ -186,14 +224,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                       <h5 class="card-title py-2">Edit Quiz</h5>
                       <textarea class="form-control" name="quiz_topic"><?php echo htmlspecialchars($row['quiz_topic']); ?></textarea><br>
                       <input type="hidden" name="quiz_id" value="<?php echo $row['quiz_id']; ?>">  
-                      <label for="batch_code">Edit batch Code</label><br>
-                       <input type="text" class="form-check-input" name="batch_code" id="batch_code" placeholder="<?php echo $row['batch_code']; ?>" required value="<?php echo $row['batch_code']; ?>"><br><br>
-                       <label for="option">Edit Quiz Link</label><br>
-                       <input type="text" class="form-check-input" name="quiz_Link"  placeholder="<?php echo $row['quiz_link']; ?>" value="<?php echo $row['quiz_link']; ?>"><br><br>
-                       <label for="option">How many questions</label><br>
+                      <label for="batch_code">Enter Batch Code</label><br>
+                      <input type="text" class="form-check-input" name="batch_code" id="batch_code" required oninput="handleBatchCodeInput(event)" value="<?php echo $row['batch_code']; ?>"><br><br>
+                      <label for="questionSets">Select Question Sets</label><br>
+                      <select id="questionSets" name="question_sets[]" multiple required>
+                                        <!-- Options will be populated dynamically -->
+                                    </select><br><br>
+                      <label for="option">How many questions</label><br>
                        <input type="text" class="form-check-input" name="how_many_questions"  placeholder="<?php echo $row['num_questions']; ?>" required value="<?php echo $row['num_questions']; ?>"><br><br>
-                       <label for="option">Total Marks</label><br>
-                       <input type="text" class="form-check-input" name="total_marks"  placeholder="<?php echo $row['total_marks']; ?>" value="<?php echo $row['total_marks']; ?>"><br><br>
+                       <label for="option">Pass percentage</label><br>
+                       <input type="text" class="form-check-input" name="pass_percentage"  placeholder="<?php echo $row['pass_percentage']; ?>" value="<?php echo $row['pass_percentage']; ?>"><br><br>
                        <label for="option">Quiz date</label><br>
                        <?php 
                        $date = new DateTime($row['quiz_date']);

@@ -157,7 +157,7 @@ $admin=$_SESSION['admin'];
                 <input type="hidden" name="batch_code" value="<?php echo $batch_code; ?>">
                 
                 <input type="submit" name="edit" value="Edit">
-                <input type="submit" name="delete" value="Delete" onclick="return confirmDelete();">
+                <input type="submit" name="delete_by_set_id" value="Delete" onclick="return confirmDelete();">
                 </form>
                 </td>
 

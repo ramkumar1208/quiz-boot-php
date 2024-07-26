@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $timings = $_POST['timings'];
 
     // Check if there is more than one question set selected
-    $set_column_value = count($mysets) > 1 ? 1 : 0;
+    $set_column_value = count($mysets) > 1 ? count($mysets) : 0;
 
     // Prepare insert query
     $insert_query = "INSERT INTO quiz_topics (quiz_topic, batch_code, question_sets, num_questions, pass_percentage, quiz_date, total_time, quiz_time, `set`)

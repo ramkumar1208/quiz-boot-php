@@ -20,6 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user_id = $_POST['ic_number']; 
     $set_id = intval($_POST['set_id']);
     $quiz_id = intval($_POST['quiz_id']);
+    $batch_code = intval($_POST['batch_code']);  
     $answers = $_POST['answers'];
 
     // Fetch the pass percentage and total questions
@@ -42,11 +43,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Insert user responses
     foreach ($answers as $question_id => $answer_id) {
-        $stmt = $conn->prepare("INSERT INTO user_responses (user_id, set_id, question_id, answer_id, quiz_id) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO user_responses (user_id, set_id, question_id, answer_id, quiz_id,batch_code) VALUES (?, ?, ?, ?, ?,?)");
         if (!$stmt) {
             die("Prepare failed: " . $conn->error);
         }
-        $stmt->bind_param("siiii", $user_id, $set_id, $question_id, $answer_id, $quiz_id);
+        $stmt->bind_param("siiiii", $user_id, $set_id, $question_id, $answer_id, $quiz_id,$batch_code);
         $stmt->execute();
     }
 
@@ -76,17 +77,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Update or insert the result into the results table
     $upsert_query = "
-        INSERT INTO results (ic_number, set_id, quiz_id, result, total_questions, correct_answers)
-        VALUES (?, ?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE result = VALUES(result), total_questions = VALUES(total_questions), correct_answers = VALUES(correct_answers)
+        INSERT INTO results (ic_number, set_id, quiz_id, result, total_questions, correct_answers,batch_code)
+        VALUES (?, ?, ?, ?, ?, ?,?)
+        ON DUPLICATE KEY UPDATE result = VALUES(result), total_questions = VALUES(total_questions), correct_answers = VALUES(correct_answers), batch_code = VALUES(batch_code)
     ";
     $stmt = $conn->prepare($upsert_query);
     if (!$stmt) {
         die("Prepare failed: " . $conn->error . " | SQL: " . $upsert_query);
     }
-    $stmt->bind_param("siiiii", $user_id, $set_id, $quiz_id, $result_status, $total_questions, $correct_count);
+    $stmt->bind_param("siiiiii", $user_id, $set_id, $quiz_id, $result_status, $total_questions, $correct_count,$batch_code);
     $stmt->execute();
-
+    $_SESSION['message']="Quiz submitted successfully";
     // Redirect to the result page
     header("Location: viewquiz.php");
     exit(); // Ensure that no further code is executed after the redirection

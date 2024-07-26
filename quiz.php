@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 session_start();
 
 if (!isset($_SESSION['user'])) {
-    $_SESSION['message'] = "please login first";
+    $_SESSION['message'] = "Please login first";
     header("Location: index.php");
     exit();
 }
@@ -14,7 +14,7 @@ $row = mysqli_fetch_array($session_db);
 $session_from_db = $row['session_id'];
 $session_id = session_id();
 if ($session_id != $session_from_db) {
-    $_SESSION['message'] = "you are logged out from another device. Please Login first";
+    $_SESSION['message'] = "You are logged out from another device. Please login first";
     header("Location: index.php");
     exit();
 }
@@ -40,11 +40,13 @@ if ($session_id != $session_from_db) {
             margin: 5px;
         }
         .container-bg {
-            background-image: url("bg.jpg");
-            background-size: cover;
-            background-position: center;
-            height: 120vh;
-        }
+                    background-image: url("bg.jpg");
+                    background-size: cover;
+                    background-position: center;
+                    min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                }
         .iframe-container {
             position: relative;
             overflow: hidden;
@@ -69,6 +71,16 @@ if ($session_id != $session_from_db) {
             z-index: 1000;
             font-size: 24px;
             text-align: center;
+        }
+        .question-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .question-image {
+            max-width: 100%;
+            height: auto;
         }
     </style>
 </head>
@@ -117,8 +129,10 @@ if ($session_id != $session_from_db) {
         <?php
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $quiz_id = $_POST['quiz_id'];
+            $batch_code=$_POST['batch_code'];
             if (isset($_POST['ques_set']) && !empty($_POST['ques_set'])) {
                 $quiz_id = $_POST['quiz_id'];
+
                 date_default_timezone_set('Asia/Singapore');
                 include "conn.php";
                 $res = mysqli_query($con, "SELECT * FROM quiz_topics WHERE quiz_id='$quiz_id'");
@@ -167,35 +181,33 @@ if ($set_id > 0) {
     $stmt->close();
 }
             ?>
-            <div id="response">
-            
-            </div>
-            <div id="question_display">
-            <form action="submit_quiz.php" method="post">
-       
-        <?php if (!empty($questions)): ?>
-            <?php foreach ($questions as $question_id => $question): ?>
-                <div>
-                    <p><?php echo htmlspecialchars($question['question']); ?></p>
-                    <?php if (!empty($question['question_image'])): ?>
-                        <img src="<?php echo htmlspecialchars($question['question_image']); ?>" alt="Question Image"><br>
+            <div id="response"></div>
+            <div class="question-container mt-4">
+                <form id="quizForm" action="submit_quiz.php" method="post">
+                <input type="hidden" name="batch_code" value="<?php echo $batch_code; ?>">
+                    <?php if (!empty($questions)): ?>
+                        <?php foreach ($questions as $question_id => $question): ?>
+                            <div class="mb-4">
+                                <p><?php echo htmlspecialchars($question['question']); ?></p>
+                                <?php if (!empty($question['question_image'])): ?>
+                                    <img class="question-image mb-3" src="<?php echo htmlspecialchars($question['question_image']); ?>" alt="Question Image"><br>
+                                <?php endif; ?>
+                                <?php foreach ($question['answers'] as $answer): ?>
+                                    <label>
+                                        <input type="radio" name="answers[<?php echo $question_id; ?>]" value="<?php echo $answer['answer_id']; ?>" required>
+                                        <?php echo htmlspecialchars($answer['answer']); ?>
+                                    </label><br>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endforeach; ?>
+                        <input type="hidden" name="ic_number" value="<?php echo $user; ?>">
+                        <input type="hidden" name="set_id" value="<?php echo $set_id; ?>">
+                        <input type="hidden" name="quiz_id" value="<?php echo $quiz_id; ?>">        
+                        <input class="btn btn-primary" type="submit" value="Submit">
+                    <?php else: ?>
+                        <p>No questions found for this set.</p>
                     <?php endif; ?>
-                    <?php foreach ($question['answers'] as $answer): ?>
-                        <label>
-                            <input type="radio" name="answers[<?php echo $question_id; ?>]" value="<?php echo $answer['answer_id']; ?>" required>
-                            <?php echo htmlspecialchars($answer['answer']); ?>
-                        </label><br>
-                    <?php endforeach; ?>
-                </div>
-            <?php endforeach; ?>
-            <input type="hidden" name="ic_number" value="<?php echo $user; ?>">
-            <input type="hidden" name="set_id" value="<?php echo $set_id; ?>">
-            <input type="hidden" name="quiz_id" value="<?php echo $quiz_id; ?>">        
-            <input type="submit" value="Submit">
-        <?php else: ?>
-            <p>No questions found for this set.</p>
-        <?php endif; ?>
-    </form>
+                </form>
             </div>
             <?php
         }
@@ -218,20 +230,7 @@ if ($set_id > 0) {
         <?php } ?>
     </div>
 </div>
-<!-- <script>
-let warningCount = 0;
 
-window.addEventListener('blur', function() {
-    if (warningCount < 3) {
-        alert('Warning ' + (warningCount + 1) + '/3: Do not switch tabs while filling the form.');
-        warningCount++;
-    } else {
-        let xhr = new XMLHttpRequest();
-        xhr.open('GET', 'set_message.php', true);
-        xhr.send();
-    }
-});
-</script> -->
 <script>
 var timer = setInterval(function(){
     var xmlhttp = new XMLHttpRequest();

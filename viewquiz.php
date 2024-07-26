@@ -201,6 +201,7 @@ if($session_id!=$session_from_db)
             ?>
            <form action="quiz.php" method="post">
                 <input type="hidden" name="quiz_id" value="<?php echo htmlspecialchars($quiz_id); ?>">
+                <input type="hidden" name="batch_code" value="<?php echo htmlspecialchars($batch_code); ?>">
                 <?php if ($row['set'] > 0) {
                       $question_sets = explode(',', $row['question_sets']);
 

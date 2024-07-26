@@ -8,6 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_quiz_by_id'])) {
     $correct_answers = isset($_POST['correct_answer']) ? $_POST['correct_answer'] : [];
     $q_id = mysqli_real_escape_string($con, $_POST['set_id']);
     $set_name = mysqli_real_escape_string($con, $_POST['set_name']);
+    $batch_code = mysqli_real_escape_string($con, $_POST['batch_code']);
+    
     $uploaded_images = [];
     $new_questions_count = 0;
     $removed_questions = isset($_POST['removed_questions']) ? array_filter(explode(',', $_POST['removed_questions'])) : [];
@@ -105,13 +107,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_quiz_by_id'])) {
     $total_questions = mysqli_real_escape_string($con, $_POST['total_question']);
     $remaining_questions = $total_questions - count($removed_questions) + $new_questions_count; // Adjust the count based on removals and additions
 
-    $update_question_sets_query = "UPDATE question_sets SET total_questions='$remaining_questions', set_name='$set_name' WHERE set_id='$q_id'";
+    $update_question_sets_query = "UPDATE question_sets SET total_questions='$remaining_questions', set_name='$set_name',batch_code='$batch_code' WHERE set_id='$q_id'";
     if (!mysqli_query($con, $update_question_sets_query)) {
         echo "Error updating question set: " . mysqli_error($con);
         exit();
     }
 
     // Optional: Redirect or show success message
-    echo "Questions and answers updated successfully.";
+    // echo "Questions and answers updated successfully.";
+    $_SESSION['message']="Questions and answers updated successfully.";
+    header("Location:edit_questions.php");
 }
 ?>
