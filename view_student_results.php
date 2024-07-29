@@ -48,6 +48,10 @@
                                     '<td>' + result.total_questions + '</td>' +
                                     '<td>' + result.correct_answers + '</td>' +
                                     '<td>' + result.created_at + '</td>' +
+                                    '<td>' + <form>
+                                    <input type="hidden" name="result_id" value=""/>
+                                    <input type="submit" />
+                                    </form> + '</td>' +
                                     '</tr>';
                                 tableBody.append(row);
                             });
@@ -174,6 +178,7 @@
                                     <th>Total Questions</th>
                                     <th>Correct Answers</th>
                                     <th>Submitted At</th>
+                                    <th>View Complete result</th>
                                 </tr>
                             </thead>
                             <tbody>
