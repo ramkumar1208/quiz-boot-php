@@ -48,15 +48,17 @@
                                     '<td>' + result.total_questions + '</td>' +
                                     '<td>' + result.correct_answers + '</td>' +
                                     '<td>' + result.created_at + '</td>' +
-                                    '<td>' + <form>
-                                    <input type="hidden" name="result_id" value=""/>
-                                    <input type="submit" />
-                                    </form> + '</td>' +
+                                    '<td>' +
+                                        '<form action="complete_result.php" method="GET">' +
+                                            '<input type="hidden" name="result_id" value="' + result.result_id + '"/>' +
+                                            '<input type="submit" value="View" class="btn btn-primary"/>' +
+                                        '</form>' +
+                                    '</td>' +
                                     '</tr>';
                                 tableBody.append(row);
                             });
                         } else {
-                            tableBody.append('<tr><td colspan="8" class="text-center">No results found</td></tr>');
+                            tableBody.append('<tr><td colspan="9" class="text-center">No results found</td></tr>');
                         }
                     }
                 });
@@ -178,7 +180,7 @@
                                     <th>Total Questions</th>
                                     <th>Correct Answers</th>
                                     <th>Submitted At</th>
-                                    <th>View Complete result</th>
+                                    <th>View Complete Result</th>
                                 </tr>
                             </thead>
                             <tbody>
