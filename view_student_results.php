@@ -18,52 +18,56 @@
         }
     </style>
     <script>
-        $(document).ready(function() {
-            function fetchResults() {
-                $.ajax({
-                    type: "POST",
-                    url: "search_results.php",
-                    data: {
-                        ic_number_search: $('#ic_number_search').val(),
-                        batch_code_search: $('#batch_code_search').val(),
-                        // Additional filters can be added here
-                    },
-                    dataType: "json",
-                    success: function(response) {
-                        var tableBody = $('#results_table tbody');
-                        tableBody.empty();
-                        if (response.length > 0) {
-                            $.each(response, function(index, result) {
-                                var row = '<tr>' +
-                                    '<td>' + result.ic_number + '</td>' +
-                                    '<td>' + result.user_name + '</td>' +
-                                    '<td>' + result.set_name + '</td>' +
-                                    '<td>' + result.quiz_topic + '</td>' +
-                                    '<td>' + (result.result == 1 ? "Pass" : "Fail") + '</td>' +
-                                    '<td>' + result.total_questions + '</td>' +
-                                    '<td>' + result.correct_answers + '</td>' +
-                                    '<td>' + result.created_at + '</td>' +
-                                    '<td>' +
-                                        '<form action="complete_result.php" method="GET">' +
-                                            '<input type="hidden" name="result_id" value="' + result.result_id + '"/>' +
-                                            '<input type="submit" value="View" class="btn btn-primary"/>' +
-                                        '</form>' +
-                                    '</td>' +
-                                    '</tr>';
-                                tableBody.append(row);
-                            });
-                        } else {
-                            tableBody.append('<tr><td colspan="9" class="text-center">No results found</td></tr>');
-                        }
-                    }
-                });
+ $(document).ready(function() {
+    function fetchResults() {
+        $.ajax({
+            type: "POST",
+            url: "search_results.php",
+            data: {
+                ic_number_search: $('#ic_number_search').val(),
+                student_name_search: $('#student_name_search').val(),
+                set_name_search: $('#set_name_search').val(),
+                quiz_name_search: $('#quiz_name_search').val(),
+                result_search: $('#result_search').val(),
+                submitted_at_search: $('#submitted_at_search').val()
+            },
+            dataType: "json",
+            success: function(response) {
+                var tableBody = $('#results_table tbody');
+                tableBody.empty();
+                if (response.length > 0) {
+                    $.each(response, function(index, result) {
+                        var row = '<tr>' +
+                            '<td>' + result.ic_number + '</td>' +
+                            '<td>' + result.user_name + '</td>' +
+                            '<td>' + result.batch_code + '</td>' +
+                            '<td>' + result.set_name + '</td>' +
+                            '<td>' + result.quiz_topic + '</td>' +
+                            '<td>' + (result.result == 1 ? "Pass" : "Fail") + '</td>' +
+                            '<td>' + result.total_questions + '</td>' +
+                            '<td>' + result.correct_answers + '</td>' +
+                            '<td>' + result.created_at + '</td>' +
+                            '<td>' +
+                                '<form action="complete_result.php" method="GET">' +
+                                    '<input type="hidden" name="result_id" value="' + result.result_id + '"/>' +
+                                    '<input type="submit" value="View" class="btn btn-primary"/>' +
+                                '</form>' +
+                            '</td>' +
+                            '</tr>';
+                        tableBody.append(row);
+                    });
+                } else {
+                    tableBody.append('<tr><td colspan="9" class="text-center">No results found</td></tr>');
+                }
             }
+        });
+    }
 
-            // Trigger fetchResults on input change
-            $('#ic_number_search, #batch_code_search').on('input', fetchResults);
+    // Trigger fetchResults on input change
+    $('#ic_number_search, #student_name_search, #set_name_search, #quiz_name_search, #result_search, #submitted_at_search').on('input change', fetchResults);
 
-            // Initial fetch
-            fetchResults();
+    // Initial fetch
+    fetchResults();
 
             // Generate Excel file on button click
             $('#generate_excel').click(function() {
@@ -151,24 +155,60 @@
                     <h2 class="text-center my-4">Student Results</h2>
 
                     <!-- Search Form -->
-                    <form method="POST" class="form-inline justify-content-center">
-                        <div class="form-group mx-sm-3 mb-2">
-                            <label for="ic_number_search" class="sr-only">IC Number</label>
-                            <input type="text" class="form-control" id="ic_number_search" name="ic_number_search" placeholder="IC Number">
-                        </div>
-                        <div class="form-group mx-sm-3 mb-2">
-                            <label for="batch_code_search" class="sr-only">Batch Code</label>
-                            <input type="text" class="form-control" id="batch_code_search" name="batch_code_search" placeholder="Batch Code">
-                        </div>
-                        <button id="generate_excel" class="btn btn-success mb-2">Generate Excel File</button>
-                    </form>
-
+                                    <form method="POST" class="form-inline justify-content-center">
+                                        <div class="form-group mx-sm-3 mb-2">
+                                            <label for="ic_number_search" class="sr-only">IC Number</label>
+                                            <input type="text" class="form-control" id="ic_number_search" name="ic_number_search" placeholder="IC Number">
+                                        </div>
+                                        <div class="form-group mx-sm-3 mb-2">
+                                            <label for="batch_code_search" class="sr-only">Batch Code</label>
+                                            <input type="text" class="form-control" id="batch_code_search" name="batch_code_search" placeholder="Batch Code">
+                                        </div>
+                                        <button id="generate_excel" class="btn btn-success mb-2">Generate Excel File</button>
+                                    </form>
+                                    <form method="POST" class="form-inline justify-content-center">
+                
+                    <div class="form-group mx-sm-3 mb-2">
+                        <label for="student_name_search" class="sr-only">Student Name</label>
+                        <select class="form-control" id="student_name_search" name="student_name_search">
+                            <option value="">Select Student</option>
+                            <!-- Options populated via JS or PHP -->
+                        </select>
+                    </div>
+                    <div class="form-group mx-sm-3 mb-2">
+                        <label for="set_name_search" class="sr-only">Set Name</label>
+                        <select class="form-control" id="set_name_search" name="set_name_search">
+                            <option value="">Select Set</option>
+                            <!-- Options populated via JS or PHP -->
+                        </select>
+                    </div>
+                    <div class="form-group mx-sm-3 mb-2">
+                        <label for="quiz_name_search" class="sr-only">Quiz Name</label>
+                        <select class="form-control" id="quiz_name_search" name="quiz_name_search">
+                            <option value="">Select Quiz</option>
+                            <!-- Options populated via JS or PHP -->
+                        </select>
+                    </div>
+                    <div class="form-group mx-sm-3 mb-2">
+                        <label for="result_search" class="sr-only">Result</label>
+                        <select class="form-control" id="result_search" name="result_search">
+                            <option value="">Select Result</option>
+                            <option value="1">Pass</option>
+                            <option value="0">Fail</option>
+                        </select>
+                    </div>
+                    <div class="form-group mx-sm-3 mb-2">
+                        <label for="submitted_at_search" class="sr-only">Submitted At</label>
+                        <input type="date" class="form-control" id="submitted_at_search" name="submitted_at_search">
+                    </div>
+                </form>
                     <div class="table-responsive">
                         <table class="table table-bordered" id="results_table">
                             <thead>
                                 <tr>
                                     <th>IC Number</th>
                                     <th>Student Name</th>
+                                    <th>Batch Code</th>
                                     <th>Set Name</th>
                                     <th>Quiz Name</th>
                                     <th>Result</th>
