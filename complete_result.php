@@ -95,9 +95,19 @@ if (isset($_GET['result_id'])) {
             ];
         }
         
-        // If export is requested
         if (isset($_GET['export']) && $_GET['export'] == 'csv') {
-            exportToCSV($combined_data, 'result_data.csv');
+            // Define the directory and file path
+            $directory = 'generated_files/';
+            $fileName = 'result_data.csv';
+            $filePath = $directory . $fileName;
+            
+            // Ensure the directory exists, create it if not
+            if (!file_exists($directory)) {
+                mkdir($directory, 0777, true);
+            }
+        
+            // Call the function with the updated file path
+            exportToCSV($combined_data, $filePath);
         }
     
     } else {
@@ -258,7 +268,11 @@ if (isset($_GET['result_id'])) {
                         foreach ($questions_data as $question) { ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($question['question']); ?></td>
-                                <td><?php echo htmlspecialchars($question['student_answer']); ?></td>
+                                <td><?php 
+                                
+
+                                echo htmlspecialchars($question['student_answer']); ?></td>
+                                
                                 <td><?php echo htmlspecialchars($question['correct_answer']); ?></td>
                                 <td><?php ?></td>
                             </tr>

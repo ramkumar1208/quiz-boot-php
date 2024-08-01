@@ -12,7 +12,12 @@ $ic_number_search = isset($_POST['ic_number_search']) ? mysqli_real_escape_strin
 $batch_code_search = isset($_POST['batch_code_search']) ? mysqli_real_escape_string($con, $_POST['batch_code_search']) : "";
 
 // Build the search query
-$query = "SELECT * FROM results WHERE 1=1"; // Base query
+// $query = "SELECT * FROM results WHERE 1=1"; // Base query
+$query = "SELECT r.*, u.user_name, qs.set_name, qt.quiz_topic
+          FROM results r
+          JOIN users u ON r.ic_number = u.ic_number
+          JOIN question_sets qs ON r.set_id = qs.set_id
+          JOIN quiz_topics qt ON r.quiz_id = qt.quiz_id";
 
 if (!empty($ic_number_search)) {
     $query .= " AND ic_number = '$ic_number_search'";

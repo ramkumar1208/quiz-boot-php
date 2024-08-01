@@ -9,12 +9,6 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <style>
-        .center-div {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 20vh;
-        }
         .container-fluid {
             background-color: #f8f9fa; /* Light grey background */
             height: 100vh;
@@ -31,7 +25,8 @@
                     url: "search_results.php",
                     data: {
                         ic_number_search: $('#ic_number_search').val(),
-                        batch_code_search: $('#batch_code_search').val()
+                        batch_code_search: $('#batch_code_search').val(),
+                        // Additional filters can be added here
                     },
                     dataType: "json",
                     success: function(response) {
@@ -41,9 +36,9 @@
                             $.each(response, function(index, result) {
                                 var row = '<tr>' +
                                     '<td>' + result.ic_number + '</td>' +
-                                    '<td>' + result.batch_code + '</td>' +
-                                    '<td>' + result.set_id + '</td>' +
-                                    '<td>' + result.quiz_id + '</td>' +
+                                    '<td>' + result.user_name + '</td>' +
+                                    '<td>' + result.set_name + '</td>' +
+                                    '<td>' + result.quiz_topic + '</td>' +
                                     '<td>' + (result.result == 1 ? "Pass" : "Fail") + '</td>' +
                                     '<td>' + result.total_questions + '</td>' +
                                     '<td>' + result.correct_answers + '</td>' +
@@ -173,9 +168,9 @@
                             <thead>
                                 <tr>
                                     <th>IC Number</th>
-                                    <th>Batch Code</th>
-                                    <th>Set ID</th>
-                                    <th>Quiz ID</th>
+                                    <th>Student Name</th>
+                                    <th>Set Name</th>
+                                    <th>Quiz Name</th>
                                     <th>Result</th>
                                     <th>Total Questions</th>
                                     <th>Correct Answers</th>
