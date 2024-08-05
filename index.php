@@ -55,15 +55,19 @@ if (isset($_SESSION['message']) && $_SESSION['message'] === "You are already log
       <li class="nav-item active">
         <a class="nav-link" href="index.php">Home<span class="sr-only">(current)</span></a>
       </li>
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <a class="nav-link" href="viewquiz.php">Quiz</a>
+      </li> -->
+      <li class="nav-item">
+        <a class="nav-link" href="#">Contact us</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">Contact</a>
+        <a class="nav-link" href="admin_login.php">Admin Login</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="admin.php">Admin</a>
+        <a class="nav-link" href="login1.php">Student Login</a>
       </li>
+
     </ul>
     
     <div class="bs-example">
@@ -74,9 +78,9 @@ if (isset($_SESSION['message']) && $_SESSION['message'] === "You are already log
         if(isset($_SESSION['user'])){ 
           $user_email=$_SESSION['user'];
           echo $user_email;  ?>
-              <a href="logout.php"><button type="button" class="btn btn-primary">Log-out</button></a>
+              <!-- <a href="logout.php"><button type="button" class="btn btn-primary">Log-out</button></a> -->
           <?php }else{ ?>        
-                <a href="login1.php"><button type="button" class="btn btn-primary">Login</button></a>
+                <!-- <a href="login1.php"><button type="button" class="btn btn-primary">Login</button></a> -->
                 <?php } ?>    
               </div>
         </div>

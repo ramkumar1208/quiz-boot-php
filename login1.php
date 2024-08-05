@@ -1,6 +1,7 @@
 <?php
   error_reporting(E_ALL);
     session_start();
+    if (!isset($_SESSION['user'])) {
     include "conn.php";
     $_SESSION['message']="";
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -43,6 +44,10 @@
           exit;
         }
     }
+   
+}else{
+    header("Location: viewquiz.php");
+}
     
 ?>
 
@@ -146,9 +151,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="#">Contact</a>
                         </li>
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link" href="admin.php">Admin</a>
-                        </li>
+                        </li> -->
                     </ul>
                     <div class="ml-auto">
                         <?php if (isset($_SESSION['user'])): ?>

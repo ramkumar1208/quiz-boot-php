@@ -2,26 +2,40 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 session_start();
+
 include "conn.php";
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_SESSION['message'] = "";
-    $u_email = $_POST['u_email'];
-    $u_pass = $_POST['u_pass'];
-    $search_query = "SELECT * FROM `teachers` WHERE `t_email`='$u_email' AND `t_pass`='$u_pass'";
-    $search_users = mysqli_query($con, $search_query);
+$_SESSION['message'] = "";
 
-    if (mysqli_num_rows($search_users) >= 1) {
-        $_SESSION['admin'] = $u_email;
-        $_SESSION['message'] = "";
-        echo "<script>window.location.href = 'admin.php';</script>";
-    } else {
-        $_SESSION['message'] = "Admin not found";
-        header("Location: admin_login.php");
-        exit();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Prepare and bind
+    if ($stmt = $con->prepare("SELECT * FROM `teachers` WHERE `t_email` = ? AND `t_pass` = ?")) {
+        $stmt->bind_param("ss", $u_email, $u_pass);
+        
+        $u_email = $_POST['u_email'];
+        $u_pass = $_POST['u_pass'];
+        
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows >= 1) {
+            $_SESSION['admin'] = $u_email;
+            header("Location: admin.php");
+            exit();
+        } else {
+            $_SESSION['message'] = "Admin not found";
+            header("Location: admin_login.php");
+            exit();
+        }
+        
+        $stmt->close();
     }
+} elseif (isset($_SESSION['admin'])) {
+    header("Location: admin.php");
+    exit();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
