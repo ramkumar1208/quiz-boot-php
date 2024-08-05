@@ -70,8 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    
+     
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quiz App</title>
@@ -79,52 +78,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <style>
-        .center-div {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            height: 20vh; /* This will make the div vertically centered on the viewport */
-        }
-
-        .alert-dismissible {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            z-index: 9999; /* Ensure the alert box is above all other elements */
-        }
-  .bs-example{
-    	margin: 5px;
-    }
-    .container-bg {
-  background-image: url("bg.jpg");
-  background-size: cover;
-  background-position: center;
-      height: 120vh;
-}
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            border: none;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .view-quizzes {
-  position: absolute;
-  top: 30%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: white;
-  max-width: 800px;
-  border: none;
-  border-radius: 10px; /* Add your desired border radius */
-}
+      .container-bg {
+                    background-image: url("bg.jpg");
+                    background-size: cover;
+                    background-position: center;
+                    min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .form-container {
+                    background: rgba(255, 255, 255, 0.8);
+                    padding: 20px;
+                    border-radius: 10px;
+                    margin: 20px auto;
+                    width: 80%;
+                    max-width: 800px;
+                }
 </style>
 <script>
            async function fetchQuestionSets(batchCode) {
@@ -213,48 +182,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if(mysqli_num_rows($result)>0){
         $row=mysqli_fetch_assoc($result);
         ?>
-        <div class="main-section">
-    <form action="edit_quizes.php" method="post">
-        <div class="container">
-          <div class="row justify-content-center">
-               <div class="col-md-8">
-                <div class="card my-2 p-3">
-                  <div class="card-body">
-                      <div class="form-check">
-                      <h5 class="card-title py-2">Edit Quiz</h5>
-                      <textarea class="form-control" name="quiz_topic"><?php echo htmlspecialchars($row['quiz_topic']); ?></textarea><br>
-                      <input type="hidden" name="quiz_id" value="<?php echo $row['quiz_id']; ?>">  
-                      <label for="batch_code">Enter Batch Code</label><br>
-                      <input type="text" class="form-check-input" name="batch_code" id="batch_code" required oninput="handleBatchCodeInput(event)" value="<?php echo $row['batch_code']; ?>"><br><br>
-                      <label for="questionSets">Select Question Sets</label><br>
-                      <select id="questionSets" name="question_sets[]" multiple required>
-                                        <!-- Options will be populated dynamically -->
-                                    </select><br><br>
-                      <label for="option">How many questions</label><br>
-                       <input type="text" class="form-check-input" name="how_many_questions"  placeholder="<?php echo $row['num_questions']; ?>" required value="<?php echo $row['num_questions']; ?>"><br><br>
-                       <label for="option">Pass percentage</label><br>
-                       <input type="text" class="form-check-input" name="pass_percentage"  placeholder="<?php echo $row['pass_percentage']; ?>" value="<?php echo $row['pass_percentage']; ?>"><br><br>
-                       <label for="option">Quiz date</label><br>
-                       <?php 
-                       $date = new DateTime($row['quiz_date']);
-                       $formattedDate = $date->format('Y-m-d');
-                       ?>
-                       <input type="date" class="form-check-input" name="quiz_date"  value="<?php echo $formattedDate; ?>"><br><br>
-                       <label for="quiz_time">Quiz Time:</label><br>
-                       <input type="time" id="quiz_time" name="quiz_time" value="13:15" placeholder="<?php echo $row['quiz_time']; ?>" value="<?php echo $row['quiz_time']; ?>"><br><br>
-                       <label for="answer">Total Timings for the quiz(00:00:00)</label><br>
-                       <input type="text" class="form-check-input" name="timings"  placeholder="<?php echo $row['total_time']; ?>" value="<?php echo $row['total_time']; ?>"><br><br>
-                      </div>
-                  </div>
-                </div>
-              </div>
-            <div class="col-md-8 mb-5">
-              <button type="submit" class="btn btn-success" name="edit_quiz_by_id">Edit Quiz</button>
-            </div>
-          </div>
-        </div>
-    </form>
-    </div> <?php 
+    <div class="form-container">
+  <form action="edit_quizes.php" method="post">
+    <h5 class="text-center mb-4">Edit Quiz</h5>
+    <div class="form-group">
+      <label for="quiz_topic">Quiz Topic</label>
+      <textarea class="form-control" name="quiz_topic" id="quiz_topic"><?php echo htmlspecialchars($row['quiz_topic']); ?></textarea>
+    </div>
+    <input type="hidden" name="quiz_id" value="<?php echo $row['quiz_id']; ?>">
+    <div class="form-group">
+      <label for="batch_code">Batch Code</label>
+      <input type="text" class="form-control" name="batch_code" id="batch_code" required oninput="handleBatchCodeInput(event)" value="<?php echo $row['batch_code']; ?>">
+    </div>
+    <div class="form-group">
+      <label for="questionSets">Select Question Sets</label>
+      <select id="questionSets" class="form-control" name="question_sets[]" multiple required>
+        <!-- Options will be populated dynamically -->
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="how_many_questions">How Many Questions</label>
+      <input type="number" class="form-control" name="how_many_questions" id="how_many_questions" required value="<?php echo $row['num_questions']; ?>">
+    </div>
+    <div class="form-group">
+      <label for="pass_percentage">Passing Percentage</label>
+      <input type="number" class="form-control" name="pass_percentage" id="pass_percentage" required value="<?php echo $row['pass_percentage']; ?>">
+    </div>
+    <div class="form-group">
+      <label for="quiz_date">Quiz Date</label>
+      <?php 
+      $date = new DateTime($row['quiz_date']);
+      $formattedDate = $date->format('Y-m-d');
+      ?>
+      <input type="date" class="form-control" name="quiz_date" id="quiz_date" required value="<?php echo $formattedDate; ?>">
+    </div>
+    <div class="form-group">
+      <label for="quiz_time">Quiz Time</label>
+      <input type="time" class="form-control" name="quiz_time" id="quiz_time" value="13:15" required>
+    </div>
+    <div class="form-group">
+      <label for="timings">Total Timings for the Quiz (HH:MM:SS)</label>
+      <input type="text" class="form-control" name="timings" id="timings" required value="<?php echo $row['total_time']; ?>">
+    </div>
+    <button type="submit" class="btn btn-success btn-block" name="edit_quiz_by_id">Edit Quiz</button>
+  </form>
+</div>
+
+
+    
+    <?php 
     }else{
         $_SESSION['message']="no quizes available";
         header("Location : editquiz.php");

@@ -45,12 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <!DOCTYPE html>
-<!-- Coding by CodingLab || www.codinglabweb.com -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"> -->
-
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Add Quiz</title>
@@ -58,40 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <style>
-         .center-div {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* This will make the div vertically centered on the viewport */
-  }
-    
-        /* 
-        .alert-dismissible {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            z-index: 9999; 
-        }
-  .bs-example{
-    	margin: 5px;
-    }
-    .container-fluid {
-  background-image: url("bg.jpg");
-  background-size: cover;
-  background-position: center;
-      height: 120vh;
-}
-.main-section {
-  position: relative;
-  top: 0%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: white;
-  max-width: 800px;
-  border: none;
-  border-radius: 10px; 
-} */
-    .container-bg {
+      .container-bg {
                     background-image: url("bg.jpg");
                     background-size: cover;
                     background-position: center;
@@ -107,96 +71,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     width: 80%;
                     max-width: 800px;
                 }
-                .image-preview {
-                    max-width: 100px;
-                    max-height: 100px;
-                }
-</style>
-<script>
-           async function fetchQuestionSets(batchCode) {
-        const response = await fetch(`get_question_sets.php?batch_code=${batchCode}`);
-        const questionSets = await response.json();
-
-        const select = document.getElementById('questionSets');
-        select.innerHTML = '';
-
-        questionSets.forEach(set => {
-            const option = document.createElement('option');
-            option.value = set.id;
-            option.textContent = `${set.name} (Total Questions: ${set.total_questions})`;
-            select.appendChild(option);
-        });
-    }
-
-    function handleBatchCodeInput(event) {
-        const batchCode = event.target.value;
-        if (batchCode) {
-            fetchQuestionSets(batchCode);
-        }
-    }
-
-        function addInput(button) {
-            const inputContainer = document.getElementById('inputContainer');
-            const newInputGroup = document.createElement('div');
-            newInputGroup.classList.add('input-group');
-            newInputGroup.innerHTML = `
-                <input type="text" name="inputs[]" />
-                <button type="button" onclick="addInput(this)">Add</button>
-            `;
-            inputContainer.appendChild(newInputGroup);
-        }
-    </script>
-<script>
-        function addInput(button) {
-            const inputGroup = document.createElement('div');
-            inputGroup.className = 'input-group';
-
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.name = 'inputs[]';
-
-           
-
-            const removeButton = document.createElement('button');
-            removeButton.type = 'button';
-            removeButton.innerText = 'Remove';
-            removeButton.onclick = function() { removeInput(removeButton) };
-
-            inputGroup.appendChild(input);
-         
-            inputGroup.appendChild(removeButton);
-
-            document.getElementById('inputContainer').appendChild(inputGroup);
-        }
-
-        function removeInput(button) {
-            const inputGroup = button.parentNode;
-            inputGroup.parentNode.removeChild(inputGroup);
-        }
-    </script>
+    </style>
   </head>
   <body>
-
-<?php
-    if (isset($_SESSION['message']) && !empty($_SESSION['message'])) {
-        $message = $_SESSION['message'];
-        $_SESSION['message'] = ""; // Clear the message after displaying it
-    ?>
-        <div class="center-div">    
-            <div id="alertBox" class="alert alert-danger alert-dismissible">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close" onclick="closeAlert()">&times;</a>
-                <?php echo $message; ?>
-            </div>
-        </div>
-    <?php } ?>
-   
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
+    <?php if (isset($_SESSION['message']) && !empty($_SESSION['message'])): ?>
+      <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+        <?php echo $_SESSION['message']; $_SESSION['message'] = ""; ?>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    <?php endif; ?>
 
     <div class="container-bg">
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -240,37 +128,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 </nav>
 
-                <div class="form-container">
-                <form action="addquiz_copy.php" method="post">
-                                    <h5 class="card-title py-2">Add Quiz Topic</h5>
-                                    <textarea class="form-control" name="quiz_topic" required></textarea><br>
-                                    <label for="batch_code">Enter Batch Code</label><br>
-                                    <input type="text" class="form-check-input" name="batch_code" id="batch_code" required oninput="handleBatchCodeInput(event)"><br><br>
-                                    <label for="questionSets">Select Question Sets</label><br>
-                                    <select id="questionSets" name="question_sets[]" multiple required>
-                                        <!-- Options will be populated dynamically -->
-                                    </select><br><br>
-                                    <label for="how_many_questions">How Many Questions</label><br>
-                                    <input type="text" class="form-check-input" name="how_many_questions" required><br><br>
-                                    <label for="total_marks">Passing percentage</label><br>
-                                    <input type="text" class="form-check-input" name="pass_percentage" required><br><br>
-                                    <label for="quiz_date">Quiz Date</label><br>
-                                    <input type="date" class="form-check-input" name="quiz_date" required><br><br>
-                                    <label for="quiz_time">Quiz Time</label><br>
-                                    <input type="time" id="quiz_time" name="quiz_time" value="13:15"><br><br>
-                                    <label for="timings">Total Timings for the Quiz (00:00:00)</label><br>
-                                    <input type="text" class="form-check-input" name="timings" required><br><br>
-                        <button type="submit" class="btn btn-success" name="answer-submit">Add Quiz</button>
-                    
+      <div class="form-container">
+        <form action="addquiz.php" method="post">
+          <h5 class="text-center mb-4">Add Quiz Topic</h5>
+          <div class="form-group">
+            <label for="quiz_topic">Quiz Topic</label>
+            <textarea class="form-control" name="quiz_topic" id="quiz_topic" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="batch_code">Batch Code</label>
+            <input type="text" class="form-control" name="batch_code" id="batch_code" required oninput="handleBatchCodeInput(event)">
+          </div>
+          <div class="form-group">
+            <label for="questionSets">Select Question Sets</label>
+            <select id="questionSets" class="form-control" name="question_sets[]" multiple required>
+              <!-- Options will be populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="how_many_questions">How Many Questions</label>
+            <input type="number" class="form-control" name="how_many_questions" id="how_many_questions" required>
+          </div>
+          <div class="form-group">
+            <label for="pass_percentage">Passing Percentage</label>
+            <input type="number" class="form-control" name="pass_percentage" id="pass_percentage" required>
+          </div>
+          <div class="form-group">
+            <label for="quiz_date">Quiz Date</label>
+            <input type="date" class="form-control" name="quiz_date" id="quiz_date" required>
+          </div>
+          <div class="form-group">
+            <label for="quiz_time">Quiz Time</label>
+            <input type="time" class="form-control" name="quiz_time" id="quiz_time" value="13:15" required>
+          </div>
+          <div class="form-group">
+            <label for="timings">Total Timings for the Quiz (HH:MM:SS)</label>
+            <input type="text" class="form-control" name="timings" id="timings" required>
+          </div>
+          <button type="submit" class="btn btn-success btn-block">Add Quiz</button>
         </form>
-
-                </div>
-            </div>
-            <script>
-        function closeAlert() {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.parentElement.style.display = 'none';
+      </div>
+    </div>
+    <script>
+      function handleBatchCodeInput(event) {
+        const batchCode = event.target.value;
+        if (batchCode) {
+          fetchQuestionSets(batchCode);
         }
+      }
+
+      async function fetchQuestionSets(batchCode) {
+        const response = await fetch(`get_question_sets.php?batch_code=${batchCode}`);
+        const questionSets = await response.json();
+
+        const select = document.getElementById('questionSets');
+        select.innerHTML = '';
+
+        questionSets.forEach(set => {
+          const option = document.createElement('option');
+          option.value = set.id;
+          option.textContent = `${set.name} (Total Questions: ${set.total_questions})`;
+          select.appendChild(option);
+        });
+      }
     </script>
-</body>
+  </body>
 </html>
