@@ -26,47 +26,95 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+<meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz App</title>
+    <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <style>
-        .center-div {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 20vh;
-        }
-        .bs-example {
-            margin: 5px;
-        }
-        .container-fluid {
-            background-image: url("bg.jpg");
-            background-size: cover;
-            background-position: center;
-            height: 120vh;
-        }
-        .main-section {
-            position: relative;
-            top: 10%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: white;
-            max-width: 800px;
-            border: none;
-            border-radius: 10px;
-        }
+      body, html {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+.container-fluid {
+    height: 100%;
+    background-image: url("bg.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.center-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.login-box {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 100%;
+    margin: 1.5rem;
+}
+
+.login-box h1 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.login-box label {
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.login-box input[type="email"], 
+.login-box input[type="password"] {
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.login-box input[type="submit"] {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.login-box input[type="submit"]:hover {
+    background: #0056b3;
+}
+
     </style>
 </head>
-
 <body>
-<div class="container-fluid">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-            <a class="navbar-brand" href="index.php">
+    <div class="container-fluid">
+        <header class="header">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="index.php">
+                    <img src="logo.png" alt="Logo" width="50">
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+                <a class="navbar-brand" href="index.php">
                 <img src="logo.png" alt="" width=50px>
             </a>
             <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
@@ -96,46 +144,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 </div>
             </div>
-        </div>
-    </nav>
+                </div>
+            </nav>
+        </header>
 
-    <div class="center-div">
-        <?php if (isset($_SESSION['message']) && !empty($_SESSION['message'])) {
-            $message = $_SESSION['message'];
-            $_SESSION['message'] = ""; // Clear the message after displaying it
-            ?>
-            <div class="alert alert-danger alert-dismissible">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                <?php echo $message; ?>
-                <?php if ($message === "You are already logged in from another device.") { ?>
-                    <a href="logout.php"><button>Logout That Device</button></a>
-                <?php } ?>
+        <?php if (isset($_SESSION['message']) && !empty($_SESSION['message'])): ?>
+            <div class="center-div">
+                <div class="alert alert-danger alert-dismissible">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <?php echo $_SESSION['message']; ?>
+                    <?php if ($_SESSION['message'] === "You are already logged in from another device."): ?>
+                        <a href="logout.php"><button>Logout That Device</button></a>
+                    <?php endif; ?>
+                </div>
             </div>
-        <?php } ?>
-    </div>
+        <?php endif; ?>
 
-    <div class="main-section">
-        <form action="admin_login.php" method="post">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-                        <div class="card my-2 p-3">
-                            <div class="card-body">
-                                <h5 class="card-title py-2">Admin Login Here</h5>
-                                <div class="form-check">
-                                    <label>Email</label><br>
+        <div class="center-div">
+            <div class="login-box">
+                <h1>Admin Login Here</h1>
+                <form action="admin_login.php" method="post">
+                <label>Email</label><br>
                                     <input type="email" placeholder="Enter your email" required name="u_email"/><br>
                                     <label>Password</label><br>
                                     <input type="password" placeholder="Enter your password" required name="u_pass"/><br><br>
                                     <button type="submit" class="btn btn-success" name="answer-submit">Login</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
-</div>
 </body>
 </html>

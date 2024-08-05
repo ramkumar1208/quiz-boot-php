@@ -15,7 +15,8 @@ $set_name_search = isset($_POST['set_name_search']) ? mysqli_real_escape_string(
 $quiz_topic_search = isset($_POST['quiz_topic_search']) ? mysqli_real_escape_string($con, $_POST['quiz_topic_search']) : "";
 $result_search = isset($_POST['result_search']) ? mysqli_real_escape_string($con, $_POST['result_search']) : "";
 $submitted_at_search = isset($_POST['submitted_at_search']) ? mysqli_real_escape_string($con, $_POST['submitted_at_search']) : "";
-
+$from_date = $_POST['from_date'] ?? '';
+$to_date = $_POST['to_date'] ?? '';
 // Build the search query
 $query = "SELECT r.*, u.user_name, qs.set_name, qt.quiz_topic
           FROM results r
@@ -25,23 +26,23 @@ $query = "SELECT r.*, u.user_name, qs.set_name, qt.quiz_topic
           WHERE 1=1";
 
 if (!empty($ic_number_search)) {
-    $query .= " AND r.ic_number = '$ic_number_search'";
+    $query .= " AND r.ic_number LIKE '%$ic_number_search%'";
 }
 
 if (!empty($batch_code_search)) {
-    $query .= " AND r.batch_code = '$batch_code_search'";
+    $query .= " AND r.batch_code LIKE '%$batch_code_search%'";
 }
 
 if (!empty($student_name_search)) {
-    $query .= " AND u.user_name = '$student_name_search'";
+    $query .= " AND r.student_name LIKE '%$student_name_search%'";
 }
 
 if (!empty($set_name_search)) {
-    $query .= " AND qs.set_name = '$set_name_search'";
+    $query .= " AND qs.set_name LIKE '%$set_name_search%'";
 }
 
 if (!empty($quiz_topic_search)) {
-    $query .= " AND qt.quiz_topic = '$quiz_topic_search'";
+    $query .= " AND qt.quiz_topic LIKE '%$quiz_topic_search%'";
 }
 
 if (!empty($result_search)) {
@@ -49,9 +50,26 @@ if (!empty($result_search)) {
 }
 
 if (!empty($submitted_at_search)) {
-    $query .= " AND DATE(r.created_at) = '$submitted_at_search'";
+    switch ($submitted_at_search) {
+        case 'year':
+            $pastDate = date('Y-m-d', strtotime('-1 year'));
+            $query .= " AND DATE(r.created_at) >= '$pastDate'";
+            break;
+        case 'month':
+            $pastDate = date('Y-m-d', strtotime('-1 month'));
+            $query .= " AND DATE(r.created_at) >= '$pastDate'";
+            break;
+        case 'week':
+            $pastDate = date('Y-m-d', strtotime('-1 week'));
+            $query .= " AND DATE(r.created_at) >= '$pastDate'";
+            break;
+        case 'custom':
+            if (!empty($from_date) && !empty($to_date)) {
+                $query .= " AND DATE(r.created_at) BETWEEN '$from_date' AND '$to_date'";
+            }
+            break;
+    }
 }
-
 // Execute the query
 $result = mysqli_query($con, $query);
 

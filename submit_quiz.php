@@ -23,6 +23,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $batch_code = intval($_POST['batch_code']);  
     $answers = $_POST['answers'];
 
+    // Fetch the student name
+    $student_name_fetch = "SELECT user_name FROM users WHERE ic_number= ?";
+    $stmt = $conn->prepare($student_name_fetch);
+    if (!$stmt) {
+        die("Prepare failed: " . $conn->error . " | SQL: " . $student_name_fetch);
+    }
+    $stmt->bind_param("s", $user_id);
+    $stmt->execute();
+    $student_result = $stmt->get_result();
+    if ($student_result->num_rows > 0) {
+        $row = $student_result->fetch_assoc();
+        $student_name = $row['user_name'];
+    } else {
+        die("No user found with ID: " . $user_id);
+    }
+
     // Fetch the pass percentage and total questions
     $find_per = "SELECT pass_percentage, num_questions FROM quiz_topics WHERE quiz_id = ?";
     $stmt = $conn->prepare($find_per);
@@ -98,15 +114,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Update or insert the result into the results table
     $upsert_query = "
-        INSERT INTO results (ic_number, set_id, quiz_id, result, total_questions, correct_answers, batch_code)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO results (ic_number, student_name, set_id, quiz_id, result, total_questions, correct_answers, batch_code)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE result = VALUES(result), total_questions = VALUES(total_questions), correct_answers = VALUES(correct_answers), batch_code = VALUES(batch_code)
     ";
     $stmt = $conn->prepare($upsert_query);
     if (!$stmt) {
         die("Prepare failed: " . $conn->error . " | SQL: " . $upsert_query);
     }
-    $stmt->bind_param("siiiiii", $user_id, $set_id, $quiz_id, $result_status, $total_questions, $correct_count, $batch_code);
+    $stmt->bind_param("ssiiiiii", $user_id, $student_name, $set_id, $quiz_id, $result_status, $total_questions, $correct_count, $batch_code);
     $stmt->execute();
     $_SESSION['message'] = "Quiz submitted successfully";
 
