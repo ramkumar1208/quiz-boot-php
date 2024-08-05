@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"> -->
 
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -58,19 +58,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <style>
-    .center-div {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            height: 20vh; /* This will make the div vertically centered on the viewport */
-        }
-
+         .center-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* This will make the div vertically centered on the viewport */
+  }
+    
+        /* 
         .alert-dismissible {
             position: absolute;
             top: 0;
             width: 100%;
-            z-index: 9999; /* Ensure the alert box is above all other elements */
+            z-index: 9999; 
         }
   .bs-example{
     	margin: 5px;
@@ -89,8 +89,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   background-color: white;
   max-width: 800px;
   border: none;
-  border-radius: 10px; /* Add your desired border radius */
-}
+  border-radius: 10px; 
+} */
+    .container-bg {
+                    background-image: url("bg.jpg");
+                    background-size: cover;
+                    background-position: center;
+                    min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .form-container {
+                    background: rgba(255, 255, 255, 0.8);
+                    padding: 20px;
+                    border-radius: 10px;
+                    margin: 20px auto;
+                    width: 80%;
+                    max-width: 800px;
+                }
+                .image-preview {
+                    max-width: 100px;
+                    max-height: 100px;
+                }
 </style>
 <script>
            async function fetchQuestionSets(batchCode) {
@@ -156,8 +176,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
   </head>
   <body>
-  <div class="container-fluid">
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+
+<?php
+    if (isset($_SESSION['message']) && !empty($_SESSION['message'])) {
+        $message = $_SESSION['message'];
+        $_SESSION['message'] = ""; // Clear the message after displaying it
+    ?>
+        <div class="center-div">    
+            <div id="alertBox" class="alert alert-danger alert-dismissible">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close" onclick="closeAlert()">&times;</a>
+                <?php echo $message; ?>
+            </div>
+        </div>
+    <?php } ?>
+   
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+
+    <div class="container-bg">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -180,14 +219,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </li>
       
     </ul>
+    
     <div class="bs-example">
     <div class="container">
         <div class="row">
             <div class="col-md-12 bg-light text-right">
             <?php 
-        if(isset($_SESSION['admin'])){ 
-          $user_email=$_SESSION['admin'];
-          echo $user_email;  ?>
+        if($_SESSION['admin']){ 
+          $admin_email=$_SESSION['admin'];
+          echo $admin_email;  ?>
               <a href="logout.php"><button type="button" class="btn btn-primary">Log-out</button></a>
           <?php }else{ ?>        
                 <a href="admin_login.php"><button type="button" class="btn btn-primary">Login</button></a>
@@ -196,29 +236,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </div>
+  
   </div>
 </nav>
 
-<?php
-    if (isset($_SESSION['message']) && !empty($_SESSION['message'])) {
-        $message = $_SESSION['message'];
-        $_SESSION['message'] = ""; // Clear the message after displaying it
-    ?>
-        <div class="center-div">    
-            <div id="alertBox" class="alert alert-danger alert-dismissible">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close" onclick="closeAlert()">&times;</a>
-                <?php echo $message; ?>
-            </div>
-        </div>
-    <?php } ?>
-    <div class="main-section">
-        <form action="addquiz.php" method="post">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-                        <div class="card my-2 p-3">
-                            <div class="card-body">
-                                <div class="form-check">
+                <div class="form-container">
+                <form action="addquiz.php" method="post">
                                     <h5 class="card-title py-2">Add Quiz Topic</h5>
                                     <textarea class="form-control" name="quiz_topic" required></textarea><br>
                                     <label for="batch_code">Enter Batch Code</label><br>
@@ -237,26 +260,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <input type="time" id="quiz_time" name="quiz_time" value="13:15"><br><br>
                                     <label for="timings">Total Timings for the Quiz (00:00:00)</label><br>
                                     <input type="text" class="form-check-input" name="timings" required><br><br>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-8 mb-5">
                         <button type="submit" class="btn btn-success" name="answer-submit">Add Quiz</button>
-                    </div>
+                    
+        </form>
+
                 </div>
             </div>
-        </form>
-    </div>
-  <script>
+            <script>
         function closeAlert() {
             const alertBox = document.getElementById('alertBox');
             alertBox.parentElement.style.display = 'none';
         }
     </script>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
 </body>
 </html>
