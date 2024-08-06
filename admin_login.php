@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         } else {
             $_SESSION['message'] = "Admin not found";
-            header("Location: admin_login.php");
+            header("Location: admin_login.php");    
             exit();
         }
         
@@ -128,9 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-                <a class="navbar-brand" href="index.php">
-                <img src="logo.png" alt="" width=50px>
-            </a>
+               
             <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                 <li class="nav-item active">
                     <a class="nav-link" href="index.php">Home<span class="sr-only">(current)</span></a>

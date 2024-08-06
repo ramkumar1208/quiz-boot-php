@@ -1,54 +1,71 @@
 <?php
-  error_reporting(E_ALL);
-    session_start();
-    if (!isset($_SESSION['user'])) {
+error_reporting(E_ALL);
+session_start();
+
+if (!isset($_SESSION['user'])) {
     include "conn.php";
-    $_SESSION['message']="";
+    $_SESSION['message'] = "";
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $u_ic=$_POST['u_ic'];
-        $u_batch=$_POST['u_batch'];
-        
+        $u_ic = $_POST['u_ic'];
+        $u_batch = $_POST['u_batch'];
         $session_id = session_id();
 
-        $search_query="select * from users where ic_number='$u_ic' && batch_code='$u_batch'";
-        $search_users=mysqli_query($con,$search_query);
-        if(mysqli_num_rows($search_users) == 1){
-          $sql = "SELECT * FROM login_sessions WHERE ic_number = '$u_ic' AND batch_code = '$u_batch'";
-        $result = $con->query($sql);
-        
-        if ($result->num_rows > 0) {
-          $row = $result->fetch_assoc();
-          if ($row['session_id'] != $session_id) {
-              $_SESSION['logout_user']=$u_ic;
-              $_SESSION['message'] = "You are already logged in from another device.";
-              header("Location: index.php");
-              exit;
-          }
-        }else{
-           // Insert/update login session
-        $sql = "INSERT INTO login_sessions (ic_number, batch_code, session_id) VALUES ('$u_ic', '$u_batch', '$session_id')
-        ON DUPLICATE KEY UPDATE session_id = '$session_id'";
-        if ($con->query($sql) === TRUE) {
-           //echo "Login successful";
-          $_SESSION['user']=$u_ic;
-          $_SESSION['batch']=$u_batch;
-          header("Location: viewquiz.php");
-          
+        // Use prepared statements to prevent SQL injection
+        if ($stmt = $con->prepare("SELECT * FROM users WHERE ic_number = ? AND batch_code = ?")) {
+            $stmt->bind_param("ss", $u_ic, $u_batch);
+            $stmt->execute();
+            $search_users = $stmt->get_result();
+
+            if ($search_users->num_rows == 1) {
+                $sql = "SELECT * FROM login_sessions WHERE ic_number = ? AND batch_code = ?";
+                if ($stmt = $con->prepare($sql)) {
+                    $stmt->bind_param("ss", $u_ic, $u_batch);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+
+                    if ($result->num_rows > 0) {
+                        $row = $result->fetch_assoc();
+                        if ($row['session_id'] != $session_id) {
+                            $_SESSION['logout_user'] = $u_ic;
+                            $_SESSION['message'] = "You are already logged in from another device.";
+                            header("Location: index.php");
+                            exit;
+                        }
+                    } else {
+                        // Insert/update login session
+                        $sql = "INSERT INTO login_sessions (ic_number, batch_code, session_id) VALUES (?, ?, ?)
+                                ON DUPLICATE KEY UPDATE session_id = ?";
+                        if ($stmt = $con->prepare($sql)) {
+                            $stmt->bind_param("ssss", $u_ic, $u_batch, $session_id, $session_id);
+                            if ($stmt->execute()) {
+                                $_SESSION['user'] = $u_ic;
+                                $_SESSION['batch'] = $u_batch;
+                                header("Location: viewquiz.php");
+                                exit;
+                            } else {
+                                // Log or handle error appropriately
+                                $_SESSION['message'] = "An error occurred during login.";
+                            }
+                        }
+                    }
+                }
+            } else {
+                $_SESSION['message'] = "User ID and password incorrect";
+                header("Location: login1.php");
+                exit;
+            }
         } else {
-            echo "Error: " . $sql . "<br>" . $con->error;
-        }
-        }
-        }else if(mysqli_num_rows($search_users) == 0){
-          $_SESSION['message']="user not found";
-          header("Location: login1.php");
-          exit;
+            // Log or handle error appropriately
+            $_SESSION['message'] = "An error occurred during login.";
+            header("Location: login1.php");
+            exit;
         }
     }
-   
-}else{
+} else {
     header("Location: viewquiz.php");
+    exit;
 }
-    
 ?>
 
 <!DOCTYPE html>

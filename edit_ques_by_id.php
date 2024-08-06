@@ -54,6 +54,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit'])) {
                     max-width: 100px;
                     max-height: 100px;
                 }
+                .batch-code-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.batch-code-group label {
+  margin-right: 10px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.batch-code-group input {
+  flex: 1;
+  max-width: 300px; /* Set a maximum width for the input field */
+  padding: 5px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.batch-code-group button {
+  padding: 5px 10px;
+  font-size: 14px;
+  border: 1px solid #007bff;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+#add_batch_code{
+    font-size: 14px;
+  border: 1px solid #007bff;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+#add_batch_code:hover{
+    background-color: #0056b3;
+    border-color: #0056b3;  
+}
+.batch-code-group button:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
             </style>
         </head>
         <body>
@@ -104,14 +151,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit'])) {
 
                 <div class="form-container">
                     <form action="edit_ques_by_id.php" method="post" enctype="multipart/form-data">
-                        <input type="hidden" name="set_id" value="<?php echo $q_id; ?>">
-                        <input type="hidden" name="total_question" value="<?php echo $total_ques; ?>">
-                        <input type="hidden" name="removed_questions" id="removed_questions" value="">
-                        <label for="question">Batch code</label>
-                        <input type="text" name="batch_code" value="<?php echo $batch_code; ?>" required><br>            
-                        <label for="question">Set name</label>
-                        <input type="text" name="set_name" value="<?php echo $set_name; ?>" required><br>
-                                    
+                    <input type="hidden" name="set_id" value="<?php echo $q_id; ?>">
+                    <input type="hidden" name="total_question" value="<?php echo $total_ques; ?>">
+                    <input type="hidden" name="removed_questions" id="removed_questions" value="">
+
+                    <label for="set_name">Set name</label>
+                    <input type="text" name="set_name" value="<?php echo $set_name; ?>" required><br>
+
+                    <label for="batch_code">Batch codes</label>
+                    <div id="batch_codes">
+                        
+                        <?php
+                        $batch_codes = explode(',', $batch_code); // Split the batch codes into an array
+                        foreach ($batch_codes as $index => $code) {
+                            ?>
+                            <div class="batch-code-group">
+                                <input type="text" name="batch_code[]" value="<?php echo $code; ?>" required>
+                                <button type="button" onclick="removeBatchCode(this)">Remove</button><br>
+                                
+                            </div>
+                            <?php
+                        }
+                        ?>
+                          <button type="button" onclick="addBatchCode()" id="add_batch_code">Add Batch Code</button><br><br>
+                          
+                    </div>
+                  
                         <div id="questions">
                             <?php
                             $questions_query = "SELECT * FROM questions WHERE set_id='$q_id'";
@@ -211,6 +276,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit'])) {
                             document.getElementById('removed_questions').value = removedQuestions.join(',');
                             console.log(removedQuestions); // Corrected here
                         }
+                        function addBatchCode() {
+                        let batchCodesDiv = document.getElementById('batch_codes');
+                        let newBatchCodeDiv = document.createElement('div');
+                        newBatchCodeDiv.classList.add('batch-code-group');
+                        newBatchCodeDiv.innerHTML = `
+                            <input type="text" name="batch_code[]" required>
+                            <button type="button" onclick="removeBatchCode(this)">Remove</button>
+                        `;
+                        batchCodesDiv.appendChild(newBatchCodeDiv);
+                    }
+
+                    function removeBatchCode(button) {
+                        button.parentElement.remove();
+                    }
                     </script>
                 </div>
             </div>
@@ -228,7 +307,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit'])) {
     $correct_answers = isset($_POST['correct_answer']) ? $_POST['correct_answer'] : [];
     $q_id = mysqli_real_escape_string($con, $_POST['set_id']);
     $set_name = mysqli_real_escape_string($con, $_POST['set_name']);
-    $batch_code = mysqli_real_escape_string($con, $_POST['batch_code']);
+    $batch_codes = isset($_POST['batch_code']) ? $_POST['batch_code'] : [];
+    $batch_codes = array_map('trim', $batch_codes); // Trim whitespace from each batch code
+    
+    // Escape each batch code and then join them with commas
+    $batch_codes_str = implode(',', array_map(function($code) use ($con) {
+        return mysqli_real_escape_string($con, $code);
+    }, $batch_codes));
     
     $uploaded_images = [];
     $new_questions_count = 0;
@@ -327,17 +412,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit'])) {
     $total_questions = mysqli_real_escape_string($con, $_POST['total_question']);
     $remaining_questions = $total_questions - count($removed_questions) + $new_questions_count; // Adjust the count based on removals and additions
 
-    $update_question_sets_query = "UPDATE question_sets SET total_questions='$remaining_questions', set_name='$set_name',batch_code='$batch_code' WHERE set_id='$q_id'";
+    $update_question_sets_query = "UPDATE question_sets SET total_questions='$remaining_questions', set_name='$set_name', batch_code='$batch_codes_str' WHERE set_id='$q_id'";
     if (!mysqli_query($con, $update_question_sets_query)) {
         echo "Error updating question set: " . mysqli_error($con);
         exit();
     }
 
-    // Optional: Redirect or show success message
-    // echo "Questions and answers updated successfully.";
-    $_SESSION['message']="Questions and answers updated successfully.";
+    $_SESSION['message'] = "Questions and answers updated successfully.";
     header("Location:edit_questions.php");
-} else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_by_set_id'])) {
+    exit();
+}else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_by_set_id'])) {
   
         $q_id = mysqli_real_escape_string($con, $_POST['set_id']);
 

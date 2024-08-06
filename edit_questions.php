@@ -1,21 +1,49 @@
 <?php
 include "conn.php";
 error_reporting(E_ALL);
-// require_once("function.php");
 session_start();
 
 if (!isset($_SESSION['admin'])) {
-  $_SESSION['message']="please login first";
-  header("Location: admin.php");
-  exit();
+    $_SESSION['message'] = "Admin please login first";
+    header('Location: admin.php');
+    exit();
 }
-$admin=$_SESSION['admin'];
+$admin = $_SESSION['admin'];
 
+$view_query = null; // Initialize the variable
+
+if (isset($_POST['search'])) {
+    $batch_code = $_POST['batch_code'];
+    
+    if (!empty($batch_code)) {
+        // Prepare the query with FIND_IN_SET if batch_code is not empty
+        $view_question = "SELECT * FROM question_sets WHERE FIND_IN_SET(?, batch_code)";
+        $stmt = $con->prepare($view_question);
+        $stmt->bind_param("s", $batch_code);
+    } else {
+        // Prepare the query to select all records if batch_code is empty
+        $view_question = "SELECT * FROM question_sets";
+        $stmt = $con->prepare($view_question);
+    }
+    
+    // Execute the query and get results
+    $stmt->execute();
+    $view_query = $stmt->get_result();
+} else {
+    // Prepare the query to select all records if no search is performed
+    $view_question = "SELECT * FROM question_sets";
+    $stmt = $con->prepare($view_question);
+    $stmt->execute();
+    $view_query = $stmt->get_result();
+}
+
+// Close the prepared statement
+$stmt->close();
 ?>
+
 <!DOCTYPE html>
-<!-- Coding by CodingLab || www.codinglabweb.com -->
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -24,25 +52,28 @@ $admin=$_SESSION['admin'];
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <style>
-          .center-div {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* This will make the div vertically centered on the viewport */
-  }
-  .bs-example{
-    	margin: 5px;
-    }
-    .container-bg {
-  background-image: url("bg.jpg");
-  background-size: cover;
-  background-position: center;
-      height: 120vh;
-}
+        .container-bg {
+            background-image: url("bg.jpg");
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .view-quizzes {
+            background-color: white;
+            max-width: 800px;
+            margin: 20px auto;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .search-input {
+            margin-bottom: 20px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            border: none;
         }
         th, td {
             border: 1px solid #ddd;
@@ -52,153 +83,112 @@ $admin=$_SESSION['admin'];
         th {
             background-color: #f2f2f2;
         }
-        .view-quizzes {
-  position: absolute;
-  top: 30%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: white;
-  max-width: 800px;
-  border: none;
-  border-radius: 10px; /* Add your desired border radius */
-}
-</style>
-  </head>
-  <body>
-      <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script> -->
-      <div class="container-bg">
-      <div class="container-fluid">
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-  <a class="navbar-brand" href="index.php">
-      <img src="logo.png" alt="" width=50px > 
-    </a>
-    <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-      <li class="nav-item active">
-        <a class="nav-link" href="index.php">Home<span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="admin_quiz.php">View Quiz</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="viewmarks.php">Student Marks</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="student_management.php">Students managemant</a>
-      </li>
-      
-    </ul>
-    
-    <div class="bs-example">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12 bg-light text-right">
-            <?php 
-        if($_SESSION['admin']){ 
-          $admin_email=$_SESSION['admin'];
-          echo $admin_email;  ?>
-              <a href="logout.php"><button type="button" class="btn btn-primary">Log-out</button></a>
-          <?php }else{ ?>        
-                <a href="admin_login.php"><button type="button" class="btn btn-primary">Login</button></a>
-                <?php } ?>    
-              </div>
-        </div>
-    </div>
-</div>
-  
-  </div>
-</nav>
-<div class="view-quizzes">
-    <h2>Quiz Schedule</h2>
-    <form action="edit_questions.php" method="post">
-    <label for="batch_code">search by Batch Code</label>&nbsp;&nbsp;<input type="text" name="batch_code" id="batch_code">&nbsp;&nbsp;<input type="submit" name="search" value="Search">
-    </form>
-    <?php 
-      if(isset($_POST['search'])){
-        $batch_code = $_POST['batch_code'];
-        $view_question = "SELECT * FROM question_sets where batch_code='$batch_code'";        
-      }else{
-        $view_question = "SELECT * FROM question_sets";
-      }
-        $view_query = mysqli_query($con, $view_question);
-        if($view_query && mysqli_num_rows($view_query) > 0) {
-    ?>
-    <table>
-        <thead>
-            <tr>
-                <th>Batch</th>
-                <th>Set name</th>
-                <th>Toatal questions</th>
-                <!-- <th>Quiz Time</th>
-                <th>Total Time</th> -->
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php  
-                while($row = mysqli_fetch_assoc($view_query)) {
-                    // $quiz_link = $row['question_sets'];
-                    $set_id=$row['set_id'];
-                    $set_name=$row['set_name'];
-                    $batch_code=$row['batch_code'];
-                    
-            ?>     
-            <tr>
-                <td><?php echo $row['batch_code']; ?></td>
-                <td><?php echo $row['set_name']; ?></td>
-                <td><?php echo $row['total_questions']; ?></td>
-                <td>
-                <form action="edit_ques_by_id.php" method="post" >
-                <input type="hidden" name="set_id" value="<?php echo $set_id; ?>">
-                <input type="hidden" name="set_name" value="<?php echo $set_name; ?>">
-                <input type="hidden" name="batch_code" value="<?php echo $batch_code; ?>">
-                
-                <input type="submit" name="edit" value="Edit">
-                <input type="submit" name="delete_by_set_id" value="Delete" onclick="return confirmDelete();">
-                </form>
-                </td>
-
-
-            </tr>
-            <?php 
-                }
-            ?>
-        </tbody>
-    </table>
-    <?php 
-        } else {
-            $_SESSION['message'] = "No question sets available";
+        .center-div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-    ?>
-</div>
-
-
-  </div>
-    
-        <?php if (isset($_SESSION['message']) && !empty($_SESSION['message'])) {
-            $message = $_SESSION['message'];
-            $_SESSION['message'] = ""; // Clear the message after displaying it
-            ?>
-    <div class="center-div">
-    <div class="alert alert-danger alert-dismissible">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                <?php echo $message; ?>
-                <?php if ($message === "You are already logged in from another device.") {  ?>
-                    <a href="logout.php"><button>Logout That Device</button></a>
+        .alert {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-bg">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+            <a class="navbar-brand" href="index.php">
+                <img src="logo.png" alt="" width="50px">
+            </a>
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item active">
+                    <a class="nav-link" href="index.php">Home<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="admin_quiz.php">View Quiz</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="viewmarks.php">Student Marks</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="student_management.php">Students Management</a>
+                </li>
+            </ul>
+            <div class="ml-auto">
+                <?php 
+                if (isset($_SESSION['admin'])) { 
+                    $admin_email = $_SESSION['admin'];
+                    echo $admin_email; ?>
+                    <a href="logout.php"><button type="button" class="btn btn-primary">Log-out</button></a>
+                <?php } else { ?>
+                    <a href="admin_login.php"><button type="button" class="btn btn-primary">Login</button></a>
                 <?php } ?>
             </div>
-            </div>
-        <?php } ?>
-    
-      </div>
-      <script>
+        </div>
+    </nav>
+
+    <div class="view-quizzes">
+        <h2>Quiz Schedule</h2>
+        <form method="post" action="">
+            <label for="batch_code">Search by Batch Code</label>
+            <input type="text" name="batch_code" id="batch_code" class="form-control search-input" placeholder="Enter Batch Code">
+            <button type="submit" name="search" class="btn btn-primary mt-2">Search</button>
+        </form>
+        <?php if ($view_query && mysqli_num_rows($view_query) > 0): ?>
+        <table>
+            <thead>
+                <tr>
+                    <th>Batch</th>
+                    <th>Set Name</th>
+                    <th>Total Questions</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = mysqli_fetch_assoc($view_query)): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['batch_code']); ?></td>
+                    <td><?php echo htmlspecialchars($row['set_name']); ?></td>
+                    <td><?php echo htmlspecialchars($row['total_questions']); ?></td>
+                    <td>
+                        <form action="edit_ques_by_id.php" method="post">
+                            <input type="hidden" name="set_id" value="<?php echo htmlspecialchars($row['set_id']); ?>">
+                            <input type="hidden" name="set_name" value="<?php echo htmlspecialchars($row['set_name']); ?>">
+                            <input type="hidden" name="batch_code" value="<?php echo htmlspecialchars($row['batch_code']); ?>">
+                            <input type="submit" name="edit" value="Edit" class="btn btn-warning btn-sm">
+                            <input type="submit" name="delete_by_set_id" value="Delete" onclick="return confirmDelete();" class="btn btn-danger btn-sm">
+                        </form>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+        <?php else: ?>
+            <p>No question sets available</p>
+        <?php endif; ?>
+    </div>
+
+    <?php if (isset($_SESSION['message']) && !empty($_SESSION['message'])): ?>
+    <div class="center-div">
+        <div class="alert alert-danger alert-dismissible">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <?php echo $_SESSION['message']; $_SESSION['message'] = ""; ?>
+            <?php if ($_SESSION['message'] === "You are already logged in from another device.") { ?>
+                <a href="logout.php"><button class="btn btn-danger">Logout That Device</button></a>
+            <?php } ?>
+        </div>
+    </div>
+    <?php endif; ?>
+</div>
+
+<script>
     function confirmDelete() {
         return confirm('Are you sure you want to delete this quiz?');
     }
 </script>
-
-  </body>
+</body>
 </html>

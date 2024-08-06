@@ -77,7 +77,8 @@ if (isset($_SESSION['message']) && $_SESSION['message'] === "You are already log
             <?php 
         if(isset($_SESSION['user'])){ 
           $user_email=$_SESSION['user'];
-          echo $user_email;  ?>
+          // echo $user_email;
+            ?>
               <!-- <a href="logout.php"><button type="button" class="btn btn-primary">Log-out</button></a> -->
           <?php }else{ ?>        
                 <!-- <a href="login1.php"><button type="button" class="btn btn-primary">Login</button></a> -->

@@ -32,18 +32,54 @@ if (!isset($_SESSION['admin'])) {
         background-image: url("bg.jpg");
         background-size: cover;
         background-position: center;
-        min-height: 100vh; /* Changed from height to min-height */
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
       }
       .form-container {
-        background: rgba(255, 255, 255, 0.8); /* White background with some transparency */
+        background: rgba(255, 255, 255, 0.8);
         padding: 20px;
         border-radius: 10px;
         margin: 20px auto;
         width: 80%;
         max-width: 800px;
       }
+      .batch-code-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.batch-code-group label {
+  margin-right: 10px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.batch-code-group input {
+  flex: 1;
+  max-width: 300px; /* Set a maximum width for the input field */
+  padding: 5px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.batch-code-group button {
+  padding: 5px 10px;
+  font-size: 14px;
+  border: 1px solid #007bff;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.batch-code-group button:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
     </style>
   </head>
   <body>
@@ -106,78 +142,99 @@ if (!isset($_SESSION['admin'])) {
     
     <div class="form-container">
     <h2>Add Questions Set</h2>
-<form action="add_questions.php" method="post" enctype="multipart/form-data">
-    <label for="batch_code">Batch code</label>
-    <input type="text" id="batch_code" name="batch_code" required><br><br>
-    
-    <label for="set_name">Set Name:</label>
-    <input type="text" id="set_name" name="set_name" required><br><br>
-    
-    <div id="questions">
-        <div class="question">
-            <label for="question">Question:</label>
-            <input type="text" name="questions[]" required><br>
-            <label for="question_image">Upload Question Image (optional):</label>
-            <input type="file" name="question_images[]" accept="image/*"><br><br>
-            
-            <label for="answers">Answers:</label><br>
-            <div class="answers">
-                <input type="text" name="answers[0][]" required>
-                <input type="radio" name="correct_answer[0]" value="0" required> Correct<br>
+    <form action="add_questions.php" method="post" enctype="multipart/form-data">
+        <div id="batch-codes">
+            <div class="batch-code-group">
+                <input type="text" name="batch_code[]" placeholder="Enter Batch Code" id="batch_code" required>
+                <button type="button" onclick="addBatchCode()">Add</button>
+                <!-- <button type="button" onclick="removeBatchCode(this)">Remove</button> -->
             </div>
-            <button type="button" onclick="addAnswer(this)">Add Another Answer</button>
-            <button type="button" onclick="removeQuestion(this)">Remove Question</button><br><br>
         </div>
-    </div>
-    
-    <button type="button" onclick="addQuestion()">Add Another Question</button><br><br>
-    <input type="submit" value="Submit">
-</form>
-</div>
-
-<script>
-    let questionIndex = 1;
-
-    function addQuestion() {
-        let questionsDiv = document.getElementById('questions');
-        let newQuestionDiv = document.createElement('div');
-        newQuestionDiv.classList.add('question');
-        newQuestionDiv.innerHTML = `
-            <label for="question">Question:</label>
-            <input type="text" name="questions[]" required><br>
-            <label for="question_image">Upload Question Image (optional):</label>
-            <input type="file" name="question_images[]" accept="image/*"><br><br>
-            
-            <label for="answers">Answers:</label><br>
-            <div class="answers">
-                <input type="text" name="answers[${questionIndex}][]" required>
-                <input type="radio" name="correct_answer[${questionIndex}]" value="0" required> Correct<br>
+        <br>
+        <label for="set_name">Set Name:</label>
+        <input type="text" id="set_name" name="set_name" required><br><br>
+        
+        <div id="questions">
+            <div class="question">
+                <label for="question">Question:</label>
+                <input type="text" name="questions[]" required><br>
+                <label for="question_image">Upload Question Image (optional):</label>
+                <input type="file" name="question_images[]" accept="image/*"><br><br>
+                
+                <label for="answers">Answers:</label><br>
+                <div class="answers">
+                    <input type="text" name="answers[0][]" required>
+                    <input type="radio" name="correct_answer[0]" value="0" required> Correct<br>
+                </div>
+                <button type="button" onclick="addAnswer(this)">Add Another Answer</button>
+                <button type="button" onclick="removeQuestion(this)">Remove Question</button><br><br>
             </div>
-            <button type="button" onclick="addAnswer(this)">Add Another Answer</button>
-            <button type="button" onclick="removeQuestion(this)">Remove Question</button><br><br>
-        `;
-        questionsDiv.appendChild(newQuestionDiv);
-        questionIndex++;
-    }
+        </div>
+        
+        <button type="button" onclick="addQuestion()">Add Another Question</button><br><br>
+        <input type="submit" value="Submit">
+    </form>
+    </div>
 
-    function addAnswer(button) {
-        let answersDiv = button.previousElementSibling;
-        let answerIndex = answersDiv.querySelectorAll('input[type="text"]').length;
-        let questionIndex = Array.from(document.querySelectorAll('.question')).indexOf(button.parentElement);
+    <script>
+        let questionIndex = 1;
 
-        let newAnswerDiv = document.createElement('div');
-        newAnswerDiv.innerHTML = `
-            <input type="text" name="answers[${questionIndex}][]" required>
-            <input type="radio" name="correct_answer[${questionIndex}]" value="${answerIndex}" required> Correct<br>
-        `;
-        answersDiv.appendChild(newAnswerDiv);
-    }
+        function addQuestion() {
+            let questionsDiv = document.getElementById('questions');
+            let newQuestionDiv = document.createElement('div');
+            newQuestionDiv.classList.add('question');
+            newQuestionDiv.innerHTML = `
+                <label for="question">Question:</label>
+                <input type="text" name="questions[]" required><br>
+                <label for="question_image">Upload Question Image (optional):</label>
+                <input type="file" name="question_images[]" accept="image/*"><br><br>
+                
+                <label for="answers">Answers:</label><br>
+                <div class="answers">
+                    <input type="text" name="answers[${questionIndex}][]" required>
+                    <input type="radio" name="correct_answer[${questionIndex}]" value="0" required> Correct<br>
+                </div>
+                <button type="button" onclick="addAnswer(this)">Add Another Answer</button>
+                <button type="button" onclick="removeQuestion(this)">Remove Question</button><br><br>
+            `;
+            questionsDiv.appendChild(newQuestionDiv);
+            questionIndex++;
+        }
 
-    function removeQuestion(button) {
-        let questionDiv = button.parentElement;
-        questionDiv.remove();
-    }
-</script>
+        function addAnswer(button) {
+            let answersDiv = button.previousElementSibling;
+            let answerIndex = answersDiv.querySelectorAll('input[type="text"]').length;
+            let questionIndex = Array.from(document.querySelectorAll('.question')).indexOf(button.parentElement);
+
+            let newAnswerDiv = document.createElement('div');
+            newAnswerDiv.innerHTML = `
+                <input type="text" name="answers[${questionIndex}][]" required>
+                <input type="radio" name="correct_answer[${questionIndex}]" value="${answerIndex}" required> Correct<br>
+            `;
+            answersDiv.appendChild(newAnswerDiv);
+        }
+
+        function removeQuestion(button) {
+            let questionDiv = button.parentElement;
+            questionDiv.remove();
+        }
+
+        function addBatchCode() {
+            let batchCodesDiv = document.getElementById('batch-codes');
+            let newBatchCodeDiv = document.createElement('div');
+            newBatchCodeDiv.classList.add('batch-code-group');
+            newBatchCodeDiv.innerHTML = `
+                <input type="text" name="batch_code[]" placeholder="Enter Batch Code" required>
+               
+                <button type="button" onclick="removeBatchCode(this)">Remove</button>
+            `;
+            batchCodesDiv.appendChild(newBatchCodeDiv);
+        }
+        // <button type="button" onclick="addBatchCode()">Add</button>
+        function removeBatchCode(button) {
+            button.parentElement.remove();
+        }
+    </script>
 
   </div>
   </body>

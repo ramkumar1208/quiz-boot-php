@@ -1,4 +1,5 @@
 <?php
+session_start();
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -14,17 +15,20 @@ if ($conn->connect_error) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $set_name = $_POST['set_name'];
-    $batch_code=$_POST['batch_code'];
+    $batch_codes = $_POST['batch_code']; // This is an array of batch codes
     $questions = $_POST['questions'];
     $answers = $_POST['answers'];
     $correct_answers = $_POST['correct_answer'];
 
+    // Convert batch codes array to a comma-separated string
+    $batch_codes_str = implode(",", $batch_codes);
+
     $target_dir = "uploads/";
     $total_questions = count($questions);
 
-    // Insert the set name into the question_sets table
-    $stmt = $conn->prepare("INSERT INTO question_sets (set_name, batch_code,total_questions) VALUES (?,?,?)");
-    $stmt->bind_param("ssi", $set_name,$batch_code,$total_questions);
+    // Insert the set name and batch codes into the question_sets table
+    $stmt = $conn->prepare("INSERT INTO question_sets (set_name, batch_code, total_questions) VALUES (?, ?, ?)");
+    $stmt->bind_param("ssi", $set_name, $batch_codes_str, $total_questions);
     $stmt->execute();
     $set_id = $stmt->insert_id;
 
@@ -52,8 +56,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->execute();
         }
     }
-
+    $_SESSION['message']="Questions added successfully!";
     echo "Questions added successfully!";
+    header("Location : ad_que.php");
 }
 
 $conn->close();
