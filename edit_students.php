@@ -140,6 +140,7 @@ $admin=$_SESSION['admin'];
         <thead>
             <tr>
                 <th>Batch Code</th>
+                <th>Roll number</th>
                 <th>IC Number</th>
                 <th>Name</th>
                 <th>Mobile</th>
@@ -156,6 +157,7 @@ $admin=$_SESSION['admin'];
             ?>     
             <tr>
                 <td><?php echo $row['batch_code']; ?></td>
+                <td><?php echo $row['roll_number']; ?></td>
                 <td><?php echo $row['ic_number']; ?></td>
                 <td><?php echo $row['user_name']; ?></td>
                 <td><?php echo $row['mobile']; ?></td> 

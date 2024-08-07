@@ -14,12 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['edit_stu_by_ic'])) {
         $edit_name = $_POST['edit_name'];
         $edit_email = $_POST['edit_email'];
+        $edit_roll=$_POST['roll_number'];
         $edit_mobile = $_POST['edit_mobile'];
         $edit_dob = $_POST['edit_dob'];
         $ic_number=$_SESSION['ic_number'];
         $edit_batch_code = $_POST['edit_batch_code'];
         
         $query = "UPDATE users SET 
+          roll_number='$edit_roll',
           user_name = '$edit_name', 
           user_email = '$edit_email', 
           mobile = '$edit_mobile', 
@@ -179,6 +181,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   <div class="card-body">
                       <div class="form-check">
                       <h5 class="card-title py-2">Edit Student details</h5>
+                      <label for="rollnumber">Edit Roll number</label><br>
+                      <input type="text" class="form-check-input" name="roll_number" id="rollnumber" placeholder="<?php echo $row['Roll_number']; ?>" required value="<?php echo $row['roll_number']; ?>"><br><br>
                       <label for="name">Edit Name</label><br>
                        <input type="text" class="form-check-input" name="edit_name" id="edit_name" placeholder="<?php echo $row['user_name']; ?>" required value="<?php echo $row['user_name']; ?>"><br><br>
                        <label for="option">Edit Email</label><br>

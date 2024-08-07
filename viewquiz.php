@@ -210,11 +210,25 @@ if($session_id!=$session_from_db)
               
                       // Remove any empty elements caused by extra commas or spaces
                       $trimmed_que_sets = array_filter($trimmed_que_sets);
-              
+                      $total_sets = count($question_sets);
+    
+                      // Determine the set to display based on user_id
+                      if ($total_sets > 0) {
+                            $roll_fetch="select roll_number from users where ic_number='$user'";
+                            $roll_query=mysqli_query($con,$roll_fetch);
+                            $row=mysqli_fetch_assoc($roll_query);
+                            $roll_number=$row['roll_number'];
+                          $set_index = ($roll_number - 1) % $total_sets;
+                          $assigned_set = $question_sets[$set_index];
+                          
+                          echo "Assigned Set: " . $assigned_set;
+                      } else {
+                          echo "No question sets available.";
+                      }
                       // Randomly select one link from trimmed links array
-                      $random_set = $trimmed_que_sets[array_rand($trimmed_que_sets)];
+                    //   $random_set = $trimmed_que_sets[array_rand($trimmed_que_sets)];
                     ?>
-                    <input type="hidden" name="ques_set" value="<?php echo htmlspecialchars($random_set); ?>">
+                    <input type="hidden" name="ques_set" value="<?php echo htmlspecialchars($assigned_set); ?>">
                 <?php } else { ?>
                     <input type="hidden" name="ques_set" value="<?php echo htmlspecialchars($question_sets); ?>">
                 <?php } ?>

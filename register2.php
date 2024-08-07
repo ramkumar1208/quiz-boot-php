@@ -5,6 +5,7 @@
         $u_name=$_POST['u_name'];
         $u_email=$_POST['u_email'];
         $u_mobile=$_POST['u_mobile'];
+        $roll_number=$_POST['roll_number']; 
         $u_dob=$_POST['date_of_birth'];
         // $u_pass=$_POST['u_pass'];
         $u_ic=$_POST['u_ic'];
@@ -14,16 +15,19 @@
         // if(mysqli_num_rows($search_users)>0){
             
         // }
-        $insert_query="insert into users(`user_name`,`mobile`,`user_email`,`user_dob`,`ic_number`,`batch_code`) values('$u_name','$u_mobile','$u_email','$u_dob','$u_ic','$u_batch')";
+        $insert_query="insert into users(`roll_number`,`user_name`,`mobile`,`user_email`,`user_dob`,`ic_number`,`batch_code`) values('$roll_number','$u_name','$u_mobile','$u_email','$u_dob','$u_ic','$u_batch')";
         $insert_data=mysqli_query($con,$insert_query);
-        if($insert_data){
-          // echo $insert_query;
-          $_SESSION['message']="Student added sucessfully";
+        if ($insert_data) {
+          $_SESSION['message'] = "Student added successfully";
           header("Location: student_management.php");
-        }else{
-          $_SESSION['message']="Error occurs";
+          exit();
+      } else {
+          $_SESSION['message'] = "Error occurs";
+          // Display the specific error message
+          die("Error inserting data: " . mysqli_error($con));
           header("Location: student_management.php");
-        }
+          exit();
+      }
     }
     
 ?>
@@ -57,8 +61,10 @@
       <h1>Add Students Here</h1>
       <!-- <h4>It's free and only takes a minute</h4> -->
       <form action="register2.php" method="post">
+        <label>Roll Number</label>
+        <input type="text" placeholder="Enter Orderwise Roll number" required name="roll_number">
         <label>Name</label>
-        <input type="name" placeholder="Enter your name" required name="u_name"/>
+        <input type="text" placeholder="Enter your name" required name="u_name"/>
         <label>Email</label>
         <input type="email" placeholder="Enter your email" required name="u_email"/>
         <label>Mobile</label>
@@ -68,7 +74,7 @@
         <label>IC Number</label>
         <input type="text" placeholder="Enter IC Number" required name="u_ic"/>
         <label>Batch Code</label>
-        <input type="name" placeholder="Enter Batch code" required name="u_batch"/>        
+        <input type="text" placeholder="Enter Batch code" required name="u_batch"/>        
         <!-- <label>Password</label>
         <input type="password" placeholder="" name="u_pass"/>
         <label>Confirm Password</label>
